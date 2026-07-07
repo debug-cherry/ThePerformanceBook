@@ -85,13 +85,53 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
           />
         </div>
       )}
-      <div class="flex flex-wrap items-center gap-3 mb-4">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-950/40 text-violet-300 border border-violet-800/40 shadow-sm shadow-violet-950/10">
-          Article
-        </span>
-        <time datetime={post.data.date.toISOString()} class="text-xs text-slate-400 font-medium">
-          {formattedDate}
-        </time>
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-950/40 text-violet-300 border border-violet-800/40 shadow-sm shadow-violet-950/10">
+            Article
+          </span>
+          <time datetime={post.data.date.toISOString()} class="text-xs text-slate-400 font-medium">
+            {formattedDate}
+          </time>
+        </div>
+        
+        <!-- Bookmark Toggle Button -->
+        <button
+          id="bookmark-toggle"
+          data-post-id={post.id}
+          data-post-title={post.data.title}
+          data-post-description={post.data.description}
+          data-post-date={post.data.date.toISOString()}
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800/60 transition-all duration-200 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+          aria-label="Bookmark Article"
+        >
+          <svg
+            id="bookmark-icon-empty"
+            class="w-3.5 h-3.5 block"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+          </svg>
+          <svg
+            id="bookmark-icon-filled"
+            class="w-3.5 h-3.5 hidden text-violet-500 fill-violet-500"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+          </svg>
+          <span id="bookmark-text">Bookmark</span>
+        </button>
       </div>
 
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
@@ -190,3 +230,79 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     )}
   </article>
 </BaseLayout>
+
+<script>
+  interface Bookmark {
+    id: string;
+    title: string;
+    description: string;
+    date: string;
+  }
+
+  const getBookmarks = (): Bookmark[] => {
+    try {
+      return JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  const saveBookmarks = (bookmarks: Bookmark[]) => {
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+  };
+
+  const setupBookmark = () => {
+    const btn = document.getElementById('bookmark-toggle');
+    if (!btn) return;
+
+    const postId = btn.getAttribute('data-post-id') || '';
+    const title = btn.getAttribute('data-post-title') || '';
+    const description = btn.getAttribute('data-post-description') || '';
+    const date = btn.getAttribute('data-post-date') || '';
+
+    const iconEmpty = document.getElementById('bookmark-icon-empty');
+    const iconFilled = document.getElementById('bookmark-icon-filled');
+    const textSpan = document.getElementById('bookmark-text');
+
+    const updateUI = (isBookmarked: boolean) => {
+      if (isBookmarked) {
+        iconEmpty?.classList.add('hidden');
+        iconFilled?.classList.remove('hidden');
+        if (textSpan) textSpan.textContent = 'Bookmarked';
+      } else {
+        iconEmpty?.classList.remove('hidden');
+        iconFilled?.classList.add('hidden');
+        if (textSpan) textSpan.textContent = 'Bookmark';
+      }
+    };
+
+    // Check initial state
+    let bookmarks = getBookmarks();
+    let isBookmarked = bookmarks.some(b => b.id === postId);
+    updateUI(isBookmarked);
+
+    // Toggle logic
+    const handleToggle = () => {
+      bookmarks = getBookmarks();
+      isBookmarked = bookmarks.some(b => b.id === postId);
+
+      if (isBookmarked) {
+        bookmarks = bookmarks.filter(b => b.id !== postId);
+      } else {
+        bookmarks.push({ id: postId, title, description, date });
+      }
+
+      saveBookmarks(bookmarks);
+      updateUI(!isBookmarked);
+    };
+
+    btn.removeEventListener('click', handleToggle);
+    btn.addEventListener('click', handleToggle);
+  };
+
+  // Run on initial load
+  setupBookmark();
+
+  // Support Astro View Transitions
+  document.addEventListener('astro:after-swap', setupBookmark);
+</script>
