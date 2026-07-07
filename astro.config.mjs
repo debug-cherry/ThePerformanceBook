@@ -14,12 +14,11 @@ export default defineConfig({
   },
   markdown: {
     processor: unified({
-      syntaxHighlight: 'shiki',
-      shikiConfig: {
-        theme: 'github-dark'
-      },
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeKatex]
-    })
+    }),
+    shikiConfig: {
+      theme: 'github-dark'
+    }
   }
 });
