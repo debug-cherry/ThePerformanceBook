@@ -97,20 +97,25 @@ if (tocHeadings.length === 0) {
 
     if (!trigger || !closeBtn || !backdrop || !drawer) return;
 
+    const elTrigger = trigger;
+    const elCloseBtn = closeBtn;
+    const elBackdrop = backdrop;
+    const elDrawer = drawer;
+
     let isOpen = false;
 
     function openDrawer() {
       isOpen = true;
-      trigger.setAttribute('aria-expanded', 'true');
-      drawer.setAttribute('aria-hidden', 'false');
-      backdrop.setAttribute('aria-hidden', 'false');
+      elTrigger.setAttribute('aria-expanded', 'true');
+      elDrawer.setAttribute('aria-hidden', 'false');
+      elBackdrop.setAttribute('aria-hidden', 'false');
 
       // Add classes for styling/transitions
-      drawer.classList.remove('translate-x-full');
-      drawer.classList.add('translate-x-0');
+      elDrawer.classList.remove('translate-x-full');
+      elDrawer.classList.add('translate-x-0');
       
-      backdrop.classList.remove('opacity-0', 'pointer-events-none');
-      backdrop.classList.add('opacity-100', 'pointer-events-auto');
+      elBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      elBackdrop.classList.add('opacity-100', 'pointer-events-auto');
 
       // Prevent body scroll
       document.body.classList.add('overflow-hidden');
@@ -118,23 +123,23 @@ if (tocHeadings.length === 0) {
 
     function closeDrawer() {
       isOpen = false;
-      trigger.setAttribute('aria-expanded', 'false');
-      drawer.setAttribute('aria-hidden', 'true');
-      backdrop.setAttribute('aria-hidden', 'true');
+      elTrigger.setAttribute('aria-expanded', 'false');
+      elDrawer.setAttribute('aria-hidden', 'true');
+      elBackdrop.setAttribute('aria-hidden', 'true');
 
       // Remove classes for styling/transitions
-      drawer.classList.remove('translate-x-0');
-      drawer.classList.add('translate-x-full');
+      elDrawer.classList.remove('translate-x-0');
+      elDrawer.classList.add('translate-x-full');
 
-      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
-      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      elBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      elBackdrop.classList.add('opacity-0', 'pointer-events-none');
 
       // Re-enable body scroll
       document.body.classList.remove('overflow-hidden');
     }
 
     // Toggle on trigger click
-    trigger.addEventListener('click', () => {
+    elTrigger.addEventListener('click', () => {
       if (isOpen) {
         closeDrawer();
       } else {
@@ -142,9 +147,9 @@ if (tocHeadings.length === 0) {
       }
     });
 
-    // Close on closeBtn or backdrop click
-    closeBtn.addEventListener('click', closeDrawer);
-    backdrop.addEventListener('click', closeDrawer);
+    // Close on elCloseBtn or elBackdrop click
+    elCloseBtn.addEventListener('click', closeDrawer);
+    elBackdrop.addEventListener('click', closeDrawer);
 
     // Close on escape key
     document.addEventListener('keydown', (e) => {

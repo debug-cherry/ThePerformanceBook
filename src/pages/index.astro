@@ -1,17 +1,160 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
+// Fetch all posts, filtering out drafts in production
+const allPosts = await getCollection('blog', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+// Sort all posts by date (newest first)
+const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Filter standalone posts (no series associated)
+const standalonePosts = sortedPosts.filter((p) => !p.data.series);
+
+// Group series posts
+const seriesGroups: Record<string, typeof allPosts> = {};
+sortedPosts.forEach((post) => {
+  if (post.data.series) {
+    if (!seriesGroups[post.data.series]) {
+      seriesGroups[post.data.series] = [];
+    }
+    seriesGroups[post.data.series].push(post);
+  }
+});
+
+// Sort each series chronologically by series_order
+Object.keys(seriesGroups).forEach((seriesName) => {
+  seriesGroups[seriesName].sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
+});
+
+// Get the base path
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Home">
+  <!-- Hero Section -->
+  <section class="py-6 mb-12 border-b border-slate-900">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0c101d] via-[#090c15] to-[#060810] border border-violet-500/10 p-8 sm:p-10 shadow-2xl">
+      <!-- Ambient background glow -->
+      <div class="absolute -top-12 -left-12 w-48 h-48 bg-violet-600/10 rounded-full blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-indigo-600/10 rounded-full blur-3xl" aria-hidden="true"></div>
+
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-violet-950/40 text-violet-300 border border-violet-850/45 tracking-wider uppercase mb-5">
+        Systems & Software Engineering
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight mb-4">
+        Unlocking High Performance
+      </h1>
+      <p class="text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
+        Deep dives, architecture patterns, and optimizations from compiler intrinsics to high-concurrency engines.
+      </p>
+    </div>
+  </section>
+
+  <div class="space-y-12">
+    <!-- Series Publications -->
+    {Object.keys(seriesGroups).length > 0 && (
+      <section>
+        <h2 class="text-xl font-bold text-white tracking-tight mb-6 flex items-center gap-2.5">
+          <span class="w-3.5 h-1.5 rounded-full bg-violet-500"></span>
+          Learning Series
+        </h2>
+        <div class="grid gap-6">
+          {Object.entries(seriesGroups).map(([seriesName, posts]) => {
+            const firstPostDate = new Date(posts[0].data.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            });
+            return (
+              <div class="group relative overflow-hidden rounded-xl border border-slate-800/80 bg-[#0c101d]/30 p-6 shadow-md hover:border-violet-500/20 hover:bg-[#0c101d]/60 transition-all duration-300">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-bold text-violet-400 tracking-wider uppercase flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                    {posts.length} Parts
+                  </span>
+                  <span class="text-xs text-slate-500 font-medium">Started {firstPostDate}</span>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">
+                  {seriesName}
+                </h3>
+                <p class="text-sm text-slate-400 mb-5 leading-relaxed">
+                  Explore theoretical models, mathematical formulas, and sample code step-by-step.
+                </p>
+                <ol class="space-y-2.5 border-t border-slate-900 pt-4">
+                  {posts.map((p, idx) => (
+                    <li class="flex items-start gap-2.5 text-sm">
+                      <span class="flex items-center justify-center w-5 h-5 rounded-full bg-slate-850 text-slate-400 text-[10px] font-bold border border-slate-800/50 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <a
+                        href={`${baseUrl}/posts/${p.id}/`}
+                        class="text-slate-300 hover:text-violet-300 font-medium transition-colors hover:underline underline-offset-4 decoration-violet-500/20"
+                      >
+                        {p.data.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
+    <!-- Standalone Posts -->
+    <section>
+      <h2 class="text-xl font-bold text-white tracking-tight mb-6 flex items-center gap-2.5">
+        <span class="w-3.5 h-1.5 rounded-full bg-violet-500"></span>
+        Latest Articles
+      </h2>
+      <div class="space-y-6">
+        {standalonePosts.map((post) => {
+          const postDate = new Date(post.data.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+          return (
+            <article class="group relative overflow-hidden rounded-xl border border-slate-800/80 bg-[#0c101d]/20 p-6 shadow-md hover:border-violet-500/20 hover:bg-[#0c101d]/50 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div class="flex-grow">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-[10px] font-bold text-violet-400 tracking-wider uppercase bg-violet-950/40 px-2 py-0.5 rounded border border-violet-850/40">
+                    Standalone
+                  </span>
+                  <time datetime={post.data.date.toISOString()} class="text-xs text-slate-500 font-medium">
+                    {postDate}
+                  </time>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">
+                  <a href={`${baseUrl}/posts/${post.id}/`}>
+                    {post.data.title}
+                  </a>
+                </h3>
+                <p class="text-sm text-slate-400 leading-relaxed max-w-xl">
+                  {post.data.description}
+                </p>
+              </div>
+              <div class="flex items-center self-end sm:self-center">
+                <a
+                  href={`${baseUrl}/posts/${post.id}/`}
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-violet-400 hover:text-white group-hover:translate-x-1.5 transition-all duration-200"
+                  aria-label={`Read ${post.data.title}`}
+                >
+                  Read Article
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
