@@ -1,0 +1,57 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  coverImage?: string;
+  date?: string | Date;
+}
+
+const { title, description, coverImage, date } = Astro.props;
+
+// Standardized site resolution to prevent subpath dropping on GitHub Pages
+const siteUrl = Astro.site || new URL('https://username.github.io/ThePerformanceBook');
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+
+let socialImageURL: URL;
+if (coverImage) {
+  if (coverImage.startsWith('http://') || coverImage.startsWith('https://')) {
+    socialImageURL = new URL(coverImage);
+  } else {
+    const resolvedPath = coverImage.startsWith('/') ? coverImage : `/${coverImage}`;
+    socialImageURL = new URL(`${siteUrl.origin}${siteUrl.pathname.replace(/\/$/, '')}${resolvedPath}`);
+  }
+} else {
+  socialImageURL = new URL(`${siteUrl.origin}${siteUrl.pathname.replace(/\/$/, '')}/default-share.png`);
+}
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "image": socialImageURL.toString(),
+  "datePublished": date ? new Date(date).toISOString() : undefined,
+  "url": canonicalURL.toString()
+};
+---
+
+<!-- Canonical & Standard SEO -->
+<link rel="canonical" href={canonicalURL} />
+<title>{title} | The Performance Book</title>
+<meta name="description" content={description} />
+
+<!-- OpenGraph / Facebook -->
+<meta property="og:type" content="article" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={`${title} | The Performance Book`} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={socialImageURL} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content={`${title} | The Performance Book`} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={socialImageURL} />
+
+<!-- JSON-LD Structured Data -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />

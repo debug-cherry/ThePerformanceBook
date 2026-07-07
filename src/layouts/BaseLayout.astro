@@ -1,12 +1,20 @@
 ---
 import '../styles/global.css';
+import SEO from '../components/SEO.astro';
 
 interface Props {
   title: string;
   description?: string;
+  coverImage?: string;
+  date?: string | Date;
 }
 
-const { title, description = "The Performance Book - Squeezing every drop of efficiency out of software." } = Astro.props;
+const {
+  title,
+  description = "The Performance Book - Squeezing every drop of efficiency out of software.",
+  coverImage,
+  date,
+} = Astro.props;
 
 // Ensure base URL pathing is correct
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -18,8 +26,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href={`${baseUrl}/favicon.svg`} />
-    <title>{title} | The Performance Book</title>
-    <meta name="description" content={description} />
+    
+    <SEO title={title} description={description} coverImage={coverImage} date={date} />
     
     <!-- Google Fonts: Outfit (Headings) and Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
