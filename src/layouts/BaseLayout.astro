@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import SEO from '../components/SEO.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 
 interface Props {
   title: string;
@@ -29,6 +30,25 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     
     <SEO title={title} description={description} coverImage={coverImage} date={date} />
     
+    <!-- FOUC-Resistant Theme Script -->
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+        return 'light';
+      })();
+      
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+    
     <!-- Google Fonts: Outfit (Headings) and Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,26 +57,27 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     <!-- KaTeX CSS for Math Rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css" integrity="sha384-vlBdW0r3AcZO/HboRPznQNowvexd3fY8qHOWkBi5q7KGgqJ+F48+DceybYmrVbmB" crossorigin="anonymous" />
   </head>
-  <body class="bg-[#0b0f19] text-[#e2e8f0] font-sans antialiased selection:bg-violet-500/30 selection:text-violet-200 min-h-screen flex flex-col">
+  <body class="bg-white dark:bg-[#0b0f19] text-slate-800 dark:text-[#e2e8f0] font-sans antialiased selection:bg-violet-500/30 selection:text-violet-200 min-h-screen flex flex-col transition-colors duration-300">
     <!-- Premium Header -->
-    <header class="border-b border-slate-800/80 bg-[#0c101d]/60 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
+    <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-[#0c101d]/60 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
       <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href={`${baseUrl}/`} class="group flex items-center gap-2.5 font-display font-bold text-xl tracking-tight text-white">
+        <a href={`${baseUrl}/`} class="group flex items-center gap-2.5 font-display font-bold text-xl tracking-tight text-slate-900 dark:text-white">
           <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:scale-105 transition-transform duration-200">
             <span class="text-white text-base font-extrabold font-display">P</span>
           </div>
-          <span class="bg-gradient-to-r from-slate-100 via-slate-100 to-slate-300 bg-clip-text text-transparent group-hover:text-violet-300 transition-colors duration-200">
+          <span class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 dark:from-slate-100 dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors duration-200">
             The Performance Book
           </span>
         </a>
         
         <nav class="flex items-center gap-6">
-          <a href={`${baseUrl}/`} class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-200">
+          <a href={`${baseUrl}/`} class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-white transition-colors duration-200">
             Articles
           </a>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-1">
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-violet-600 dark:hover:text-white transition-colors duration-200 flex items-center gap-1">
             GitHub
           </a>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -67,13 +88,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-900 bg-[#080b12] py-8 text-center text-slate-500 text-xs">
+    <footer class="border-t border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-[#080b12] py-8 text-center text-slate-400 dark:text-slate-500 text-xs transition-colors duration-300">
       <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <p>© {new Date().getFullYear()} The Performance Book. All rights reserved.</p>
         <p class="flex gap-4">
-          <a href={`${baseUrl}/`} class="hover:text-slate-300 transition-colors">Home</a>
-          <span class="text-slate-700">•</span>
-          <a href="https://github.com" class="hover:text-slate-300 transition-colors">GitHub</a>
+          <a href={`${baseUrl}/`} class="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Home</a>
+          <span class="text-slate-300 dark:text-slate-700">•</span>
+          <a href="https://github.com" class="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">GitHub</a>
         </p>
       </div>
     </footer>
@@ -84,9 +105,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   /* Base Typography Overrides for Premium Aesthetic */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
-    color: #ffffff;
+    color: #0f172a;
     font-weight: 700;
     letter-spacing: -0.025em;
+  }
+
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: #ffffff;
   }
   
   body {
@@ -97,19 +122,28 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     font-family: 'Fira Code', monospace;
   }
 
-  /* Styling KaTeX formula blocks for clean dark mode presentation */
+  /* Styling KaTeX formula blocks for clean presentation */
   .katex-display {
     padding: 1.25rem;
-    background-color: rgba(15, 23, 42, 0.4);
-    border: 1px solid rgba(51, 65, 85, 0.3);
+    background-color: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: 0.75rem;
     overflow-x: auto;
     margin: 1.5rem 0;
-    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  }
+
+  .dark .katex-display {
+    background-color: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(51, 65, 85, 0.3);
   }
 
   .katex {
     font-size: 1.05em;
+    color: #334155;
+  }
+
+  .dark .katex {
     color: #cbd5e1;
   }
 
@@ -117,7 +151,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   pre {
     padding: 1.25rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(51, 65, 85, 0.25);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     margin: 1.5rem 0;
     font-size: 0.9em;
     line-height: 1.6;
@@ -125,10 +159,18 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     background-color: #0d1117 !important;
   }
 
+  .dark pre {
+    border: 1px solid rgba(51, 65, 85, 0.25);
+  }
+
   /* Article prose styles to simulate tailwind typography */
   .prose p {
     margin-bottom: 1.25rem;
     line-height: 1.75;
+    color: #334155;
+  }
+
+  .dark .prose p {
     color: #cbd5e1;
   }
 
@@ -136,8 +178,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     font-size: 1.65rem;
     margin-top: 2rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(51, 65, 85, 0.2);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
     padding-bottom: 0.4rem;
+  }
+
+  .dark .prose h2 {
+    border-bottom: 1px solid rgba(51, 65, 85, 0.2);
   }
 
   .prose h3 {
@@ -150,6 +196,10 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     list-style-type: disc;
     padding-left: 1.5rem;
     margin-bottom: 1.25rem;
+    color: #334155;
+  }
+
+  .dark .prose ul {
     color: #cbd5e1;
   }
 
@@ -157,6 +207,10 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     list-style-type: decimal;
     padding-left: 1.5rem;
     margin-bottom: 1.25rem;
+    color: #334155;
+  }
+
+  .dark .prose ol {
     color: #cbd5e1;
   }
 
@@ -166,14 +220,22 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   }
 
   .prose a {
-    color: #a78bfa;
+    color: #6d28d9;
     text-decoration: underline;
     text-underline-offset: 4px;
     font-weight: 500;
     transition: color 0.15s ease;
   }
 
+  .dark .prose a {
+    color: #a78bfa;
+  }
+
   .prose a:hover {
+    color: #4c1d95;
+  }
+
+  .dark .prose a:hover {
     color: #c084fc;
   }
 
@@ -181,7 +243,11 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     border-left: 4px solid #8b5cf6;
     padding-left: 1.25rem;
     font-style: italic;
-    color: #94a3b8;
+    color: #475569;
     margin: 1.5rem 0;
+  }
+
+  .dark .prose blockquote {
+    color: #94a3b8;
   }
 </style>
