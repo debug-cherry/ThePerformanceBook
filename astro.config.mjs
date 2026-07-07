@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://username.github.io',
+  site: 'https://debug-cherry.github.io',
   base: '/ThePerformanceBook',
   vite: {
     plugins: [tailwindcss()]
