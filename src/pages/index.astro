@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 // Fetch all posts, filtering out drafts in production
@@ -11,15 +11,24 @@ const allPosts = await getCollection('blog', ({ data }) => {
 const allSeries = await getCollection('series');
 const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
 
-// Sort all posts by date (newest first)
-const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+// Sort all posts globally by date descending (Absolute newest first)
+const sortedPosts = [...allPosts].sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Isolate the absolute latest post
+const latestPost = sortedPosts[0];
+
+// Resolve the series relationship context if the latest post is part of one
+let latestPostSeries = null;
+if (latestPost && latestPost.data.series) {
+  latestPostSeries = await getEntry(latestPost.data.series);
+}
 
 // Filter standalone posts (no series associated)
 const standalonePosts = sortedPosts.filter((p) => !p.data.series);
 
 // Group series posts by series ID
 const seriesGroups: Record<string, typeof allPosts> = {};
-sortedPosts.forEach((post) => {
+allPosts.forEach((post) => {
   if (post.data.series) {
     const seriesId = post.data.series.id;
     if (!seriesGroups[seriesId]) {
@@ -39,130 +48,322 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <BaseLayout title="Home">
-  <!-- Hero Section -->
-  <section class="py-6 mb-12 border-b border-border-muted">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-bg-surface to-bg-surface/90 border border-border-muted p-8 sm:p-10 shadow-2xl">
-      <!-- Ambient background glow -->
-      <div class="absolute -top-12 -left-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
-      <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
+  <div class="home-container">
+    <!-- Hero Section -->
+    <section class="py-6 mb-12 border-b border-border-muted">
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-bg-surface to-bg-surface/90 border border-border-muted p-8 sm:p-10 shadow-2xl">
+        <!-- Ambient background glow -->
+        <div class="absolute -top-12 -left-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
+        <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
 
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-bg-base/20 text-text-base border border-border-muted tracking-wider uppercase mb-5">
-        Systems & Software Engineering
-      </span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-base leading-tight mb-4">
-        Unlocking High Performance
-      </h1>
-      <p class="text-text-base/80 text-base sm:text-lg max-w-xl leading-relaxed">
-        Deep dives, architecture patterns, and optimizations from compiler intrinsics to high-concurrency engines.
-      </p>
-    </div>
-  </section>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-bg-base/20 text-text-base border border-border-muted tracking-wider uppercase mb-5">
+          Systems & Software Engineering
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-base leading-tight mb-4">
+          Unlocking High Performance
+        </h1>
+        <p class="text-text-base/80 text-base sm:text-lg max-w-xl leading-relaxed">
+          Deep dives, architecture patterns, and optimizations from compiler intrinsics to high-concurrency engines.
+        </p>
+      </div>
+    </section>
 
-  <div class="space-y-12">
-    <!-- Series Publications -->
-    {Object.keys(seriesGroups).length > 0 && (
+    <!-- Latest Article Section -->
+    <section class="latest-section">
+      <h3 class="section-title">Latest Article</h3>
+      
+      {latestPost && (
+        <article class="latest-post-card group">
+          <!-- Left Column: Flex-Grow container -->
+          <div class="card-body-content">
+            <div class="card-meta">
+              
+              <!-- Dynamic Badge Type Configuration -->
+              {latestPostSeries ? (
+                <span class="series-badge">
+                  Part {latestPost.data.series_order || 1} • {latestPostSeries.data.title}
+                </span>
+              ) : (
+                <span class="standalone-badge">Standalone</span>
+              )}
+              
+              <time datetime={latestPost.data.date.toISOString()}>
+                {latestPost.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </time>
+            </div>
+            
+            <h2>
+              <a href={`${baseUrl}/posts/${latestPost.id}/`} class="card-link">{latestPost.data.title}</a>
+            </h2>
+            
+            <p class="card-description">{latestPost.data.description}</p>
+          </div>
+
+          <!-- Right Column: Flex-Locked Link -->
+          <div class="card-action-wrapper">
+            <a href={`${baseUrl}/posts/${latestPost.id}/`} class="read-more-btn">
+              <span>Read Article</span>
+              <span class="arrow">→</span>
+            </a>
+          </div>
+        </article>
+      )}
+    </section>
+
+    <div class="space-y-12">
+      <!-- Series Publications -->
+      {Object.keys(seriesGroups).length > 0 && (
+        <section>
+          <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
+            <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
+            Learning Series
+          </h2>
+          <div class="grid gap-6">
+            {Object.entries(seriesGroups).map(([seriesId, posts]) => {
+              const series = seriesMap.get(seriesId);
+              const firstPostDate = new Date(posts[0].data.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
+              return (
+                <div class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/50 hover:bg-bg-surface/20 transition-all duration-300">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold text-text-muted tracking-wider uppercase flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full bg-bg-surface"></span>
+                      {posts.length} Parts
+                    </span>
+                    <span class="text-xs text-text-muted font-medium">Started {firstPostDate}</span>
+                  </div>
+                  <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
+                    <a href={`${baseUrl}/series/${seriesId}/`} class="hover:underline">
+                      {series?.data.title || seriesId}
+                    </a>
+                  </h3>
+                  <p class="text-sm text-text-muted mb-5 leading-relaxed">
+                    {series?.data.description || "Explore theoretical models, mathematical formulas, and sample code step-by-step."}
+                  </p>
+                  <ol class="space-y-2.5 border-t border-border-muted pt-4">
+                    {posts.map((p, idx) => (
+                      <li class="flex items-start gap-2.5 text-sm">
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-bg-surface/20 text-text-base text-[10px] font-bold border border-border-muted mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <a
+                          href={`${baseUrl}/posts/${p.id}/`}
+                          class="text-text-base hover:text-text-muted font-medium transition-colors hover:underline underline-offset-4 decoration-bg-surface/20"
+                        >
+                          {p.data.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <!-- Standalone Posts -->
       <section>
         <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
           <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
-          Learning Series
+          Latest Articles
         </h2>
-        <div class="grid gap-6">
-          {Object.entries(seriesGroups).map(([seriesId, posts]) => {
-            const series = seriesMap.get(seriesId);
-            const firstPostDate = new Date(posts[0].data.date).toLocaleDateString('en-US', {
+        <div class="space-y-6">
+          {standalonePosts.map((post) => {
+            const postDate = new Date(post.data.date).toLocaleDateString('en-US', {
               year: 'numeric',
-              month: 'short',
+              month: 'long',
               day: 'numeric',
             });
             return (
-              <div class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/50 hover:bg-bg-surface/20 transition-all duration-300">
-                <div class="flex items-center justify-between mb-3">
-                  <span class="text-xs font-bold text-text-muted tracking-wider uppercase flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-bg-surface"></span>
-                    {posts.length} Parts
-                  </span>
-                  <span class="text-xs text-text-muted font-medium">Started {firstPostDate}</span>
+              <article class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/30 hover:bg-bg-surface/20 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div class="flex-grow">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
+                      Standalone
+                    </span>
+                    <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
+                      {postDate}
+                    </time>
+                  </div>
+                  <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
+                    <a href={`${baseUrl}/posts/${post.id}/`}>
+                      {post.data.title}
+                    </a>
+                  </h3>
+                  <p class="text-sm text-text-muted leading-relaxed max-w-xl">
+                    {post.data.description}
+                  </p>
                 </div>
-                <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
-                  <a href={`${baseUrl}/series/${seriesId}/`} class="hover:underline">
-                    {series?.data.title || seriesId}
+                <div class="flex items-center self-end sm:self-center">
+                  <a
+                    href={`${baseUrl}/posts/${post.id}/`}
+                    class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
+                    aria-label={`Read ${post.data.title}`}
+                  >
+                    Read Article
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"></path>
+                      <path d="m12 5 7 7-7 7"></path>
+                    </svg>
                   </a>
-                </h3>
-                <p class="text-sm text-text-muted mb-5 leading-relaxed">
-                  {series?.data.description || "Explore theoretical models, mathematical formulas, and sample code step-by-step."}
-                </p>
-                <ol class="space-y-2.5 border-t border-border-muted pt-4">
-                  {posts.map((p, idx) => (
-                    <li class="flex items-start gap-2.5 text-sm">
-                      <span class="flex items-center justify-center w-5 h-5 rounded-full bg-bg-surface/20 text-text-base text-[10px] font-bold border border-border-muted mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <a
-                        href={`${baseUrl}/posts/${p.id}/`}
-                        class="text-text-base hover:text-text-muted font-medium transition-colors hover:underline underline-offset-4 decoration-bg-surface/20"
-                      >
-                        {p.data.title}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+                </div>
+              </article>
             );
           })}
         </div>
       </section>
-    )}
-
-    <!-- Standalone Posts -->
-    <section>
-      <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
-        <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
-        Latest Articles
-      </h2>
-      <div class="space-y-6">
-        {standalonePosts.map((post) => {
-          const postDate = new Date(post.data.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-          return (
-            <article class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/30 hover:bg-bg-surface/20 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div class="flex-grow">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
-                    Standalone
-                  </span>
-                  <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
-                    {postDate}
-                  </time>
-                </div>
-                <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
-                  <a href={`${baseUrl}/posts/${post.id}/`}>
-                    {post.data.title}
-                  </a>
-                </h3>
-                <p class="text-sm text-text-muted leading-relaxed max-w-xl">
-                  {post.data.description}
-                </p>
-              </div>
-              <div class="flex items-center self-end sm:self-center">
-                <a
-                  href={`${baseUrl}/posts/${post.id}/`}
-                  class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
-                  aria-label={`Read ${post.data.title}`}
-                >
-                  Read Article
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14"></path>
-                    <path d="m12 5 7 7-7 7"></path>
-                  </svg>
-                </a>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </section>
+    </div>
   </div>
 </BaseLayout>
+
+<style>
+  .home-container {
+    max-width: 98ch;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+  }
+
+  .latest-section {
+    margin-bottom: 4rem;
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-base);
+    margin-bottom: 1.5rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--color-border-muted);
+  }
+
+  /* Card Layout CSS (Width-Optimized) */
+  .latest-post-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3rem;
+    padding: 2rem;
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border-muted);
+    border-radius: 8px;
+    width: 100%;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  .latest-post-card:hover {
+    border-color: rgba(65, 90, 119, 0.4);
+    background-color: rgba(27, 38, 59, 0.2);
+  }
+
+  .card-body-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-action-wrapper {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .card-body-content h2,
+  .card-body-content p {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Badges Styling */
+  .standalone-badge {
+    border: 1px solid var(--color-border-muted);
+    color: var(--color-text-muted);
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 4px;
+    border: 1px solid var(--color-border-muted);
+  }
+
+  .series-badge {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-base);
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 4px;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid var(--color-border-muted);
+  }
+
+  .card-link {
+    color: var(--color-text-base);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.25rem;
+    transition: color 0.15s ease;
+  }
+
+  .card-link:hover {
+    color: var(--color-text-muted);
+  }
+
+  .card-description {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .read-more-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-base);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .read-more-btn:hover {
+    color: var(--color-text-muted);
+  }
+
+  .read-more-btn:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  .arrow {
+    display: inline-block;
+    transition: transform 0.15s ease;
+  }
+
+  @media (max-width: 640px) {
+    .latest-post-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+    .card-action-wrapper {
+      align-self: flex-end;
+    }
+  }
+</style>
