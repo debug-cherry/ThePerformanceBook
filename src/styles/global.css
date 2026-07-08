@@ -1,3 +1,25 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+:root {
+  --bg-base: #e8f1f2;       /* Ice-blue background */
+  --bg-surface: #1b98e0;    /* Sky blue accent */
+  --border-muted: #247ba0;  /* Slate border */
+  --text-muted: #006494;    /* Deep teal secondary text */
+  --text-base: #13293d;     /* Deep navy primary text */
+}
+
+.dark {
+  --bg-base: #0d1b2a;       /* Deep navy background */
+  --bg-surface: #1b263b;    /* Medium slate surface */
+  --border-muted: #415a77;  /* Muted grey-blue border */
+  --text-muted: #778da9;    /* Light steel text */
+  --text-base: #e0e1dd;     /* Warm white primary text */
+}
+
+@theme {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-border-muted: var(--border-muted);
+  --color-text-muted: var(--text-muted);
+  --color-text-base: var(--text-base);
+}

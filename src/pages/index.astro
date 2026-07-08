@@ -35,19 +35,19 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <BaseLayout title="Home">
   <!-- Hero Section -->
-  <section class="py-6 mb-12 border-b border-slate-200 dark:border-slate-900">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0c101d] via-[#090c15] to-[#060810] border border-violet-500/10 p-8 sm:p-10 shadow-2xl">
+  <section class="py-6 mb-12 border-b border-border-muted">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-bg-surface to-bg-surface/90 border border-border-muted p-8 sm:p-10 shadow-2xl">
       <!-- Ambient background glow -->
-      <div class="absolute -top-12 -left-12 w-48 h-48 bg-violet-600/10 rounded-full blur-3xl" aria-hidden="true"></div>
-      <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-indigo-600/10 rounded-full blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -top-12 -left-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-bg-base/20 rounded-full blur-3xl" aria-hidden="true"></div>
 
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-violet-950/40 text-violet-300 border border-violet-850/45 tracking-wider uppercase mb-5">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-bg-base/20 text-text-base border border-border-muted tracking-wider uppercase mb-5">
         Systems & Software Engineering
       </span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight mb-4">
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-base leading-tight mb-4">
         Unlocking High Performance
       </h1>
-      <p class="text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
+      <p class="text-text-base/80 text-base sm:text-lg max-w-xl leading-relaxed">
         Deep dives, architecture patterns, and optimizations from compiler intrinsics to high-concurrency engines.
       </p>
     </div>
@@ -57,8 +57,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     <!-- Series Publications -->
     {Object.keys(seriesGroups).length > 0 && (
       <section>
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-2.5">
-          <span class="w-3.5 h-1.5 rounded-full bg-violet-500"></span>
+        <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
+          <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
           Learning Series
         </h2>
         <div class="grid gap-6">
@@ -69,29 +69,29 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
               day: 'numeric',
             });
             return (
-              <div class="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c101d]/30 p-6 shadow-md hover:border-violet-500/20 hover:bg-slate-50 dark:hover:bg-[#0c101d]/60 transition-all duration-300">
+              <div class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/50 hover:bg-bg-surface/20 transition-all duration-300">
                 <div class="flex items-center justify-between mb-3">
-                  <span class="text-xs font-bold text-violet-600 dark:text-violet-400 tracking-wider uppercase flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                  <span class="text-xs font-bold text-text-muted tracking-wider uppercase flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-bg-surface"></span>
                     {posts.length} Parts
                   </span>
-                  <span class="text-xs text-slate-500 font-medium">Started {firstPostDate}</span>
+                  <span class="text-xs text-text-muted font-medium">Started {firstPostDate}</span>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">
+                <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
                   {seriesName}
                 </h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400 mb-5 leading-relaxed">
+                <p class="text-sm text-text-muted mb-5 leading-relaxed">
                   Explore theoretical models, mathematical formulas, and sample code step-by-step.
                 </p>
-                <ol class="space-y-2.5 border-t border-slate-200 dark:border-slate-900 pt-4">
+                <ol class="space-y-2.5 border-t border-border-muted pt-4">
                   {posts.map((p, idx) => (
                     <li class="flex items-start gap-2.5 text-sm">
-                      <span class="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-850 dark:text-slate-400 text-[10px] font-bold border border-slate-200 dark:border-slate-800/50 mt-0.5">
+                      <span class="flex items-center justify-center w-5 h-5 rounded-full bg-bg-surface/20 text-text-base text-[10px] font-bold border border-border-muted mt-0.5">
                         {idx + 1}
                       </span>
                       <a
                         href={`${baseUrl}/posts/${p.id}/`}
-                        class="text-slate-700 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-300 font-medium transition-colors hover:underline underline-offset-4 decoration-violet-500/20"
+                        class="text-text-base hover:text-text-muted font-medium transition-colors hover:underline underline-offset-4 decoration-bg-surface/20"
                       >
                         {p.data.title}
                       </a>
@@ -107,8 +107,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
     <!-- Standalone Posts -->
     <section>
-      <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight mb-6 flex items-center gap-2.5">
-        <span class="w-3.5 h-1.5 rounded-full bg-violet-500"></span>
+      <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
+        <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
         Latest Articles
       </h2>
       <div class="space-y-6">
@@ -119,29 +119,29 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
             day: 'numeric',
           });
           return (
-            <article class="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-50/30 dark:bg-[#0c101d]/20 p-6 shadow-md hover:border-violet-500/20 hover:bg-slate-50 dark:hover:bg-[#0c101d]/50 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <article class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/30 hover:bg-bg-surface/20 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div class="flex-grow">
                 <div class="flex items-center gap-2 mb-2">
-                  <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400 tracking-wider uppercase bg-violet-100 dark:bg-violet-950/40 px-2 py-0.5 rounded border border-violet-200 dark:border-violet-850/40">
+                  <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
                     Standalone
                   </span>
-                  <time datetime={post.data.date.toISOString()} class="text-xs text-slate-500 font-medium">
+                  <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
                     {postDate}
                   </time>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">
+                <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
                   <a href={`${baseUrl}/posts/${post.id}/`}>
                     {post.data.title}
                   </a>
                 </h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
+                <p class="text-sm text-text-muted leading-relaxed max-w-xl">
                   {post.data.description}
                 </p>
               </div>
               <div class="flex items-center self-end sm:self-center">
                 <a
                   href={`${baseUrl}/posts/${post.id}/`}
-                  class="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-white group-hover:translate-x-1.5 transition-all duration-200"
+                  class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
                   aria-label={`Read ${post.data.title}`}
                 >
                   Read Article
