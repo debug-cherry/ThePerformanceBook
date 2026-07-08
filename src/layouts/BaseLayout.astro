@@ -8,6 +8,7 @@ interface Props {
   description?: string;
   coverImage?: string;
   date?: string | Date;
+  isPost?: boolean;
 }
 
 const {
@@ -15,6 +16,7 @@ const {
   description = "The Performance Book - Squeezing every drop of efficiency out of software.",
   coverImage,
   date,
+  isPost = false,
 } = Astro.props;
 
 // Ensure base URL pathing is correct
@@ -54,6 +56,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
       }
     </script>
     
+    <!-- FOUC-Resistant Width Script -->
+    <script is:inline>
+      const readerWidth = localStorage.getItem('reader-width') || '98ch';
+      document.documentElement.style.setProperty('--reading-width', readerWidth);
+    </script>
+    
     <!-- Google Fonts: Outfit (Headings) and Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -65,7 +73,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   <body class="bg-bg-base text-text-base font-sans antialiased selection:bg-bg-surface/30 selection:text-text-base min-h-screen flex flex-col transition-colors duration-200">
     <!-- Premium Header -->
     <header class="border-b border-border-muted bg-bg-base/80 backdrop-blur-md sticky top-0 z-40 transition-colors duration-200">
-      <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class={`mx-auto px-6 h-16 flex items-center justify-between ${isPost ? 'max-w-7xl' : 'max-w-4xl'}`}>
         <a href={`${baseUrl}/`} class="group flex items-center gap-2.5 font-display font-bold text-xl tracking-tight text-text-base">
           <div class="w-8 h-8 rounded-lg bg-bg-surface flex items-center justify-center shadow-lg shadow-bg-surface/20 group-hover:scale-105 transition-transform duration-200">
             <span class="text-bg-base text-base font-extrabold font-display">P</span>
@@ -91,13 +99,13 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     </header>
 
     <!-- Main Content Container with max reading length limit -->
-    <main class="flex-grow max-w-[65ch] w-full mx-auto px-6 py-12">
+    <main class={`flex-grow w-full mx-auto px-6 py-12 ${isPost ? 'max-w-7xl' : 'max-w-[65ch]'}`}>
       <slot />
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-border-muted bg-bg-base/50 py-8 text-center text-text-muted text-xs transition-colors duration-200">
-      <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class={`mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 ${isPost ? 'max-w-7xl' : 'max-w-4xl'}`}>
         <p>© {new Date().getFullYear()} The Performance Book. All rights reserved.</p>
         <p class="flex gap-4">
           <a href={`${baseUrl}/`} class="hover:text-text-base transition-colors">Home</a>

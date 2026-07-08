@@ -20,10 +20,10 @@ if (tocHeadings.length === 0) {
 }
 ---
 
-<!-- Floating Trigger Button -->
+<!-- Floating Trigger Button (Mobile/Tablet Only) -->
 <button
   id="toc-trigger"
-  class="fixed bottom-6 right-6 z-50 p-3.5 rounded-full bg-bg-surface hover:bg-bg-surface/90 text-text-base shadow-lg border border-border-muted flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-bg-surface focus:ring-offset-2 focus:ring-offset-bg-base"
+  class="fixed bottom-6 right-6 z-50 p-3.5 rounded-full bg-bg-surface hover:bg-bg-surface/90 text-text-base shadow-lg border border-border-muted flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-bg-surface focus:ring-offset-2 focus:ring-offset-bg-base lg:hidden"
   aria-label="Open Table of Contents"
   aria-expanded="false"
   aria-controls="toc-drawer"
@@ -37,21 +37,21 @@ if (tocHeadings.length === 0) {
   </svg>
 </button>
 
-<!-- Backdrop Overlay -->
+<!-- Backdrop Overlay (Mobile/Tablet Only) -->
 <div
   id="toc-backdrop"
-  class="fixed inset-0 bg-bg-base/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"
+  class="fixed inset-0 bg-bg-base/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"
   aria-hidden="true"
 ></div>
 
 <!-- Drawer Sidebar -->
 <aside
   id="toc-drawer"
-  class="fixed top-0 right-0 h-full w-full max-w-[340px] bg-bg-base border-l border-border-muted z-50 translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
+  class="fixed top-0 right-0 h-full w-full max-w-[340px] bg-bg-base border-l border-border-muted z-50 translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col lg:static lg:h-auto lg:w-full lg:max-w-none lg:bg-transparent lg:border-l-0 lg:z-auto lg:translate-x-0 lg:shadow-none"
   aria-hidden="true"
 >
-  <!-- Drawer Header -->
-  <div class="h-16 px-6 border-b border-border-muted flex items-center justify-between">
+  <!-- Drawer Header (Mobile/Tablet Only) -->
+  <div class="h-16 px-6 border-b border-border-muted flex items-center justify-between lg:hidden">
     <h3 class="text-base font-semibold text-text-base tracking-tight">Table of Contents</h3>
     <button
       id="toc-close"
@@ -67,16 +67,16 @@ if (tocHeadings.length === 0) {
   </div>
 
   <!-- Drawer Body (Links) -->
-  <nav class="flex-grow overflow-y-auto px-6 py-6 scrollbar-thin">
-    <ul class="space-y-3.5">
+  <nav class="flex-grow overflow-y-auto px-6 py-6 lg:px-0 lg:py-0 scrollbar-thin">
+    <ul class="space-y-2">
       {tocHeadings.map((heading) => (
-        <li class={heading.depth === 3 ? "pl-4 border-l border-border-muted/40" : ""}>
+        <li>
           <a
             href={`#${heading.slug}`}
-            class={`toc-link block text-sm transition-all duration-150 py-1 hover:translate-x-1 ${
+            class={`toc-link block text-[13px] transition-all duration-150 py-1.5 border-l-2 border-transparent pl-3 ${
               heading.depth === 2
-                ? "font-medium text-text-base hover:text-text-muted"
-                : "text-text-muted hover:text-text-base text-[13px]"
+                ? "font-medium text-text-muted hover:text-text-base"
+                : "text-text-muted/70 hover:text-text-base ml-3 pl-2.5 border-l border-border-muted/30"
             }`}
           >
             {heading.text}
@@ -88,6 +88,8 @@ if (tocHeadings.length === 0) {
 </aside>
 
 <script>
+  let activeObserver: IntersectionObserver | null = null;
+
   function initTOC() {
     const trigger = document.getElementById('toc-trigger');
     const closeBtn = document.getElementById('toc-close');
@@ -95,82 +97,110 @@ if (tocHeadings.length === 0) {
     const drawer = document.getElementById('toc-drawer');
     const links = document.querySelectorAll('.toc-link');
 
-    if (!trigger || !closeBtn || !backdrop || !drawer) return;
+    if (trigger && closeBtn && backdrop && drawer) {
+      const elTrigger = trigger;
+      const elCloseBtn = closeBtn;
+      const elBackdrop = backdrop;
+      const elDrawer = drawer;
 
-    const elTrigger = trigger;
-    const elCloseBtn = closeBtn;
-    const elBackdrop = backdrop;
-    const elDrawer = drawer;
+      let isOpen = false;
 
-    let isOpen = false;
-
-    function openDrawer() {
-      isOpen = true;
-      elTrigger.setAttribute('aria-expanded', 'true');
-      elDrawer.setAttribute('aria-hidden', 'false');
-      elBackdrop.setAttribute('aria-hidden', 'false');
-
-      // Add classes for styling/transitions
-      elDrawer.classList.remove('translate-x-full');
-      elDrawer.classList.add('translate-x-0');
-      
-      elBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-      elBackdrop.classList.add('opacity-100', 'pointer-events-auto');
-
-      // Prevent body scroll
-      document.body.classList.add('overflow-hidden');
-    }
-
-    function closeDrawer() {
-      isOpen = false;
-      elTrigger.setAttribute('aria-expanded', 'false');
-      elDrawer.setAttribute('aria-hidden', 'true');
-      elBackdrop.setAttribute('aria-hidden', 'true');
-
-      // Remove classes for styling/transitions
-      elDrawer.classList.remove('translate-x-0');
-      elDrawer.classList.add('translate-x-full');
-
-      elBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
-      elBackdrop.classList.add('opacity-0', 'pointer-events-none');
-
-      // Re-enable body scroll
-      document.body.classList.remove('overflow-hidden');
-    }
-
-    // Toggle on trigger click
-    elTrigger.addEventListener('click', () => {
-      if (isOpen) {
-        closeDrawer();
-      } else {
-        openDrawer();
+      function openDrawer() {
+        isOpen = true;
+        elTrigger.setAttribute('aria-expanded', 'true');
+        elDrawer.setAttribute('aria-hidden', 'false');
+        elBackdrop.setAttribute('aria-hidden', 'false');
+        elDrawer.classList.remove('translate-x-full');
+        elDrawer.classList.add('translate-x-0');
+        elBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        elBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+        document.body.classList.add('overflow-hidden');
       }
-    });
 
-    // Close on elCloseBtn or elBackdrop click
-    elCloseBtn.addEventListener('click', closeDrawer);
-    elBackdrop.addEventListener('click', closeDrawer);
-
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        closeDrawer();
+      function closeDrawer() {
+        isOpen = false;
+        elTrigger.setAttribute('aria-expanded', 'false');
+        elDrawer.setAttribute('aria-hidden', 'true');
+        elBackdrop.setAttribute('aria-hidden', 'true');
+        elDrawer.classList.remove('translate-x-0');
+        elDrawer.classList.add('translate-x-full');
+        elBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+        elBackdrop.classList.add('opacity-0', 'pointer-events-none');
+        document.body.classList.remove('overflow-hidden');
       }
-    });
 
-    // Close on link click (smooth scrolling anchor jump)
-    links.forEach(link => {
-      link.addEventListener('click', () => {
-        // Delay slightly for smooth transitions
-        setTimeout(closeDrawer, 200);
+      elTrigger.removeEventListener('click', openDrawer);
+      elTrigger.addEventListener('click', () => {
+        if (isOpen) closeDrawer();
+        else openDrawer();
       });
+
+      elCloseBtn.removeEventListener('click', closeDrawer);
+      elCloseBtn.addEventListener('click', closeDrawer);
+      elBackdrop.removeEventListener('click', closeDrawer);
+      elBackdrop.addEventListener('click', closeDrawer);
+
+      const keyHandler = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && isOpen) closeDrawer();
+      };
+      document.removeEventListener('keydown', keyHandler);
+      document.addEventListener('keydown', keyHandler);
+
+      links.forEach(link => {
+        link.removeEventListener('click', closeDrawer);
+        link.addEventListener('click', () => {
+          setTimeout(closeDrawer, 150);
+        });
+      });
+    }
+
+    // Scroll-Spy Setup
+    if (activeObserver) {
+      activeObserver.disconnect();
+      activeObserver = null;
+    }
+
+    const headings = Array.from(document.querySelectorAll('article h2, article h3'));
+    const tocLinks = document.querySelectorAll('.toc-link');
+
+    if (headings.length === 0 || tocLinks.length === 0) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -70% 0px',
+      threshold: 0
+    };
+
+    activeObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          if (!id) return;
+          
+          tocLinks.forEach((link) => {
+            const href = link.getAttribute('href')?.substring(1);
+            if (href === id) {
+              link.classList.add('active-heading');
+              link.setAttribute('aria-current', 'location');
+            } else {
+              link.classList.remove('active-heading');
+              link.removeAttribute('aria-current');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    headings.forEach((heading) => {
+      if (heading.getAttribute('id')) {
+        activeObserver?.observe(heading);
+      }
     });
   }
 
-  // Support Astro View Transitions and standard page loads
-  document.addEventListener('astro:page-load', initTOC);
-  // Fallback for direct page loads/non-transition pages
+  // Setup on page loads and view transition swaps
   initTOC();
+  document.addEventListener('astro:page-load', initTOC);
 </script>
 
 <style>
@@ -187,5 +217,12 @@ if (tocHeadings.length === 0) {
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-muted);
+  }
+
+  /* Active Highlight Styling */
+  .toc-link.active-heading {
+    color: var(--color-text-base) !important;
+    font-weight: 600;
+    border-left-color: var(--color-border-muted) !important;
   }
 </style>
