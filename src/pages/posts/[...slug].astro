@@ -181,7 +181,7 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
           <div class="bg-bg-surface/10 border border-border-muted rounded-2xl p-6 mb-10 shadow-lg">
             <h3 class="text-sm font-bold text-text-base tracking-wider uppercase mb-3.5 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-bg-surface"></span>
-              Series: <a href={`${baseUrl}/series/${post.data.series.id}/`} class="hover:underline text-text-base">{seriesEntry?.data.title || post.data.series.id}</a>
+              Series: <a href={`${baseUrl}/series/${post.data.series?.id}/`} class="hover:underline text-text-base">{seriesEntry?.data.title || post.data.series?.id}</a>
             </h3>
             <p class="text-xs text-text-muted mb-4">
               This article is part of a {seriesPosts.length}-part series. Follow along below:
