@@ -13,6 +13,7 @@ const blog = defineCollection({
     series_order: z.number().optional(),
     coverImage: z.string().optional(),
     coverAlt: z.string().optional(),
+    width: z.enum(['narrow', 'standard', 'wide']).default('standard'),
   }),
 });
 

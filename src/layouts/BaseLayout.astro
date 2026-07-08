@@ -56,12 +56,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
       }
     </script>
     
-    <!-- FOUC-Resistant Width Script -->
-    <script is:inline>
-      const readerWidth = localStorage.getItem('reader-width') || '98ch';
-      document.documentElement.style.setProperty('--reading-width', readerWidth);
-    </script>
-    
     <!-- Google Fonts: Outfit (Headings) and Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -99,7 +93,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     </header>
 
     <!-- Main Content Container with max reading length limit -->
-    <main class={`flex-grow w-full mx-auto px-6 py-12 ${isPost ? 'max-w-7xl' : 'max-w-[65ch]'}`}>
+    <main class={`flex-grow w-full mx-auto ${isPost ? 'max-w-none px-0 py-0' : 'max-w-[65ch] px-6 py-12'}`}>
       <slot />
     </main>
 

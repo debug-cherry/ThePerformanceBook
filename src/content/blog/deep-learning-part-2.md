@@ -5,6 +5,7 @@ description: "Understanding backpropagation, gradient calculation via the chain 
 draft: false
 series: "Deep Learning"
 series_order: 2
+width: narrow
 ---
 
 Welcome back to the **Deep Learning** series. In this second installment, we explore how neural networks learn: **Backpropagation** and gradient descent optimization.

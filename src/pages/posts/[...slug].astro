@@ -3,7 +3,6 @@ import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
-import WidthAdjuster from '../../components/WidthAdjuster.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
@@ -45,12 +44,39 @@ if (isSeries) {
 
 // Get the base path
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Map front matter values to technical width limits
+const widthMapping = {
+  narrow: '65ch',
+  standard: '80ch',
+  wide: '98ch',
+};
+const selectedWidth = widthMapping[post.data.width || 'standard'];
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} coverImage={post.data.coverImage} date={post.data.date} isPost={true}>
-  <div class="blog-grid-layout">
-    <!-- Left Column: Reading Pane -->
-    <main class="reading-pane">
+  <div class="viewport-wrapper" style={`--reading-width: ${selectedWidth};`}>
+    
+    <!-- Left Side Collapsible Panel (TOC) -->
+    <aside class="left-hover-panel" aria-label="Table of Contents Sidebar">
+      <div class="panel-inner-container">
+        
+        <!-- Collapsed Strip/Indicator (Always visible) -->
+        <div class="collapse-strip">
+          <span class="expand-arrow">→</span>
+        </div>
+        
+        <!-- Table of Contents Content (Revealed on hover) -->
+        <div class="toc-content-wrapper">
+          <h4 class="sidebar-heading">ON THIS PAGE</h4>
+          <TableOfContents headings={headings} />
+        </div>
+        
+      </div>
+    </aside>
+
+    <!-- Centered Reading Pane -->
+    <main class="centered-reading-pane">
       <!-- Navigation / Back to Home -->
       <a
         href={`${baseUrl}/`}
@@ -97,8 +123,6 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-              <WidthAdjuster />
-              
               <!-- Bookmark Toggle Button -->
               <button
                 id="bookmark-toggle"
@@ -235,74 +259,112 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
         )}
       </article>
     </main>
-
-    <!-- Right Column: Permanent Sticky TOC on Desktop -->
-    <aside class="toc-sidebar">
-      <div class="sticky-wrapper">
-        <h4 class="toc-title">On This Page</h4>
-        <TableOfContents headings={headings} />
-      </div>
-    </aside>
   </div>
 </BaseLayout>
 
 <style>
-  .blog-grid-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  .reading-pane {
+  .viewport-wrapper {
+    position: relative;
     width: 100%;
-    max-width: var(--reading-width, 98ch);
-    transition: max-width 0.2s ease-in-out;
+    min-height: 100vh;
   }
 
-  .toc-sidebar {
-    position: static;
-    display: block;
+  /* Centered Article Layout (Relative to the whole viewport) */
+  .centered-reading-pane {
+    max-width: var(--reading-width, 80ch);
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+    width: 100%;
   }
 
-  .sticky-wrapper {
-    display: block;
+  /* Fixed Left Sidebar */
+  .left-hover-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 50px; /* Collapsed state width */
+    background-color: var(--color-bg-base);
+    border-right: 1px solid var(--color-border-muted);
+    z-index: 50;
+    overflow: hidden;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .toc-title {
-    display: none;
-  }
-
-  /* Desktop View (> 1024px) */
+  /* Expand Sidebar on Hover */
   @media (min-width: 1024px) {
-    .blog-grid-layout {
-      grid-template-columns: minmax(0, 1fr) 280px;
+    .left-hover-panel:hover {
+      width: 300px; /* Expanded state width */
+      background-color: var(--color-bg-surface);
     }
-    
-    .toc-sidebar {
-      display: block;
-    }
+  }
 
-    .sticky-wrapper {
-      position: sticky;
-      top: 6rem;
-      max-height: calc(100vh - 9rem);
-      overflow-y: auto;
-    }
+  /* Inner Wrapper must maintain fixed width to prevent text reflow */
+  .panel-inner-container {
+    display: flex;
+    width: 300px;
+    height: 100%;
+  }
 
-    .toc-title {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-bottom: 0.75rem;
+  /* Vertical Trigger Strip */
+  .collapse-strip {
+    width: 50px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+
+  .left-hover-panel:hover .collapse-strip {
+    border-right-color: var(--color-border-muted);
+  }
+
+  .expand-arrow {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    transition: transform 0.3s ease;
+  }
+
+  .left-hover-panel:hover .expand-arrow {
+    transform: rotate(180deg); /* Arrow flips inward when expanded */
+  }
+
+  /* TOC Links Container */
+  .toc-content-wrapper {
+    width: 250px;
+    padding: 2rem 1.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    overflow-y: auto;
+  }
+
+  .left-hover-panel:hover .toc-content-wrapper {
+    opacity: 1;
+  }
+
+  .sidebar-heading {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  /* Mobile Treatment (Hide hover-panel, use standard inline top-page layout) */
+  @media (max-width: 1023px) {
+    .left-hover-panel,
+    .panel-inner-container,
+    .toc-content-wrapper {
+      display: contents;
+    }
+    .collapse-strip,
+    .sidebar-heading {
+      display: none;
     }
   }
 </style>
-</BaseLayout>
 
 <script>
   interface Bookmark {
@@ -369,13 +431,10 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
       updateUI(!isBookmarked);
     };
 
-    btn.removeEventListener('click', handleToggle);
     btn.addEventListener('click', handleToggle);
   };
 
-  // Run on initial load
+  // Setup on page loads and view transition swaps
   setupBookmark();
-
-  // Support Astro View Transitions
-  document.addEventListener('astro:after-swap', setupBookmark);
+  document.addEventListener('astro:page-load', setupBookmark);
 </script>

@@ -5,6 +5,7 @@ description: "An introduction to neural networks, activation functions, and thei
 draft: false
 series: "Deep Learning"
 series_order: 1
+width: wide
 ---
 
 Welcome to Part 1 of the **Deep Learning** series. In this post, we will cover the absolute basics of neural networks, starting from the single neuron (perceptron) and moving to layers and activations.
