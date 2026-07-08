@@ -34,9 +34,10 @@ let prevPost = null;
 let nextPost = null;
 
 if (isSeries && post.data.series) {
-  seriesEntry = await getEntry(post.data.series);
+  const currentSeries = post.data.series;
+  seriesEntry = await getEntry(currentSeries);
   seriesPosts = allPosts
-    .filter((p) => p.data.series?.id === post.data.series.id)
+    .filter((p) => p.data.series?.id === currentSeries.id)
     .sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
 
   currentIndex = seriesPosts.findIndex((p) => p.id === post.id);
