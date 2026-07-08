@@ -1,0 +1,154 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const seriesEntries = await getCollection('series');
+  return seriesEntries.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { title, description } = entry.data;
+
+// Get all non-draft posts linked to this specific series
+const posts = (await getCollection('blog'))
+  .filter(p => !p.data.draft && p.data.series?.id === entry.id)
+  // Default sort: Ascending chronological (Old to New)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+// Helper function to strip markdown and extract a plain text preview
+function getPlainPreview(body: string, length = 180) {
+  const cleanText = body
+    .replace(/[#*`_\[\]()\-+]/g, '') // Strips markdown tokens
+    .replace(/\s+/g, ' ')            // Collapses white spaces
+    .trim();
+  return cleanText.length > length ? cleanText.substring(0, length) + '...' : cleanText;
+}
+
+// Get the base path
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="py-6 mb-8 border-b border-border-muted flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="max-w-2xl">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[10px] font-bold bg-bg-surface text-text-base border border-border-muted tracking-wider uppercase mb-3">
+        Series Curation
+      </span>
+      <h1 class="text-3xl font-extrabold tracking-tight text-text-base leading-tight mb-2">
+        {title}
+      </h1>
+      <p class="text-text-muted text-base leading-relaxed">
+        {description}
+      </p>
+    </div>
+
+    <!-- Sort Selector Tool -->
+    <div class="flex items-center gap-2.5 bg-bg-surface/35 border border-border-muted rounded-xl px-3.5 py-2 shadow-sm shrink-0">
+      <label for="series-sort-select" class="text-xs font-semibold text-text-muted select-none">
+        Sort:
+      </label>
+      <select 
+        id="series-sort-select" 
+        class="bg-transparent text-xs font-bold text-text-base focus:outline-none border-none cursor-pointer pr-1"
+      >
+        <option value="old-to-new" class="bg-bg-base text-text-base">Oldest First</option>
+        <option value="new-to-old" class="bg-bg-base text-text-base">Newest First</option>
+        <option value="a-to-z" class="bg-bg-base text-text-base">Title: A-Z</option>
+        <option value="z-to-a" class="bg-bg-base text-text-base">Title: Z-A</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Cards Layout Container -->
+  <div id="sort-cards-wrapper" class="space-y-6">
+    {posts.map((post, index) => {
+      const postDate = new Date(post.data.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      return (
+        <article 
+          class="post-card group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/30 hover:bg-bg-surface/20 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+          data-date={post.data.date.toISOString()} 
+          data-title={post.data.title}
+        >
+          <div class="flex-grow">
+            <div class="flex items-center gap-2.5 mb-2">
+              <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
+                Part {index + 1}
+              </span>
+              <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
+                {postDate}
+              </time>
+            </div>
+            <h2 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
+              <a href={`${baseUrl}/posts/${post.id}/`}>{post.data.title}</a>
+            </h2>
+            <p class="text-sm text-text-muted mb-4 leading-relaxed max-w-xl">
+              {post.data.description}
+            </p>
+            <p class="text-xs text-text-muted/75 italic bg-bg-surface/5 p-3 rounded-lg border border-border-muted/30 leading-relaxed font-mono max-w-xl">
+              {getPlainPreview(post.body)}
+            </p>
+          </div>
+          <div class="flex items-center self-end sm:self-center shrink-0">
+            <a
+              href={`${baseUrl}/posts/${post.id}/`}
+              class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
+              aria-label={`Read ${post.data.title}`}
+            >
+              Read Article
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</BaseLayout>
+
+<script>
+  function initSorter() {
+    const select = document.getElementById('series-sort-select') as HTMLSelectElement | null;
+    const wrapper = document.getElementById('sort-cards-wrapper');
+    if (!select || !wrapper) return;
+
+    select.addEventListener('change', () => {
+      const cards = Array.from(wrapper.querySelectorAll('.post-card'));
+      const sortValue = select.value;
+
+      cards.sort((a, b) => {
+        const titleA = a.getAttribute('data-title') || '';
+        const titleB = b.getAttribute('data-title') || '';
+        const dateA = new Date(a.getAttribute('data-date') || 0).getTime();
+        const dateB = new Date(b.getAttribute('data-date') || 0).getTime();
+
+        if (sortValue === 'old-to-new') {
+          return dateA - dateB;
+        } else if (sortValue === 'new-to-old') {
+          return dateB - dateA;
+        } else if (sortValue === 'a-to-z') {
+          return titleA.localeCompare(titleB);
+        } else if (sortValue === 'z-to-a') {
+          return titleB.localeCompare(titleA);
+        }
+        return 0;
+      });
+
+      // Re-append cards in sorted order
+      cards.forEach(card => wrapper.appendChild(card));
+    });
+  }
+
+  // Run on page loads
+  document.addEventListener('astro:page-load', initSorter);
+  initSorter();
+</script>

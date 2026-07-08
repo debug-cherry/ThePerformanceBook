@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --bg-base: #e8f1f2;       /* Ice-blue background */
-  --bg-surface: #1b98e0;    /* Sky blue accent */
-  --border-muted: #247ba0;  /* Slate border */
-  --text-muted: #006494;    /* Deep teal secondary text */
-  --text-base: #13293d;     /* Deep navy primary text */
+  --bg-base: #f8f9fb;       /* Ice-blue background */
+  --bg-surface: #ffffff;    /* Sky blue accent */
+  --border-muted: #e4e4e7;  /* Slate border */
+  --text-muted: #71717a;    /* Deep teal secondary text */
+  --text-base: #030303;     /* Deep navy primary text */
 }
 
 .dark {
-  --bg-base: #0d1b2a;       /* Deep navy background */
-  --bg-surface: #1b263b;    /* Medium slate surface */
-  --border-muted: #415a77;  /* Muted grey-blue border */
-  --text-muted: #778da9;    /* Light steel text */
-  --text-base: #e0e1dd;     /* Warm white primary text */
+  --bg-base: #1e1e1e;       /* Deep navy background */
+  --bg-surface: #252526;    /* Medium slate surface */
+  --border-muted: #3c3c3c;  /* Muted grey-blue border */
+  --text-muted: #9da5b4;    /* Light steel text */
+  --text-base: #d4d4d4;     /* Warm white primary text */
 }
 
 @theme {

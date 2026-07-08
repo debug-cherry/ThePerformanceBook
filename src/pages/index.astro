@@ -7,26 +7,31 @@ const allPosts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
 });
 
+// Fetch all series profile entries
+const allSeries = await getCollection('series');
+const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
+
 // Sort all posts by date (newest first)
 const sortedPosts = allPosts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 // Filter standalone posts (no series associated)
 const standalonePosts = sortedPosts.filter((p) => !p.data.series);
 
-// Group series posts
+// Group series posts by series ID
 const seriesGroups: Record<string, typeof allPosts> = {};
 sortedPosts.forEach((post) => {
   if (post.data.series) {
-    if (!seriesGroups[post.data.series]) {
-      seriesGroups[post.data.series] = [];
+    const seriesId = post.data.series.id;
+    if (!seriesGroups[seriesId]) {
+      seriesGroups[seriesId] = [];
     }
-    seriesGroups[post.data.series].push(post);
+    seriesGroups[seriesId].push(post);
   }
 });
 
 // Sort each series chronologically by series_order
-Object.keys(seriesGroups).forEach((seriesName) => {
-  seriesGroups[seriesName].sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
+Object.keys(seriesGroups).forEach((seriesId) => {
+  seriesGroups[seriesId].sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
 });
 
 // Get the base path
@@ -62,7 +67,8 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
           Learning Series
         </h2>
         <div class="grid gap-6">
-          {Object.entries(seriesGroups).map(([seriesName, posts]) => {
+          {Object.entries(seriesGroups).map(([seriesId, posts]) => {
+            const series = seriesMap.get(seriesId);
             const firstPostDate = new Date(posts[0].data.date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'short',
@@ -78,10 +84,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
                   <span class="text-xs text-text-muted font-medium">Started {firstPostDate}</span>
                 </div>
                 <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
-                  {seriesName}
+                  <a href={`${baseUrl}/series/${seriesId}/`} class="hover:underline">
+                    {series?.data.title || seriesId}
+                  </a>
                 </h3>
                 <p class="text-sm text-text-muted mb-5 leading-relaxed">
-                  Explore theoretical models, mathematical formulas, and sample code step-by-step.
+                  {series?.data.description || "Explore theoretical models, mathematical formulas, and sample code step-by-step."}
                 </p>
                 <ol class="space-y-2.5 border-t border-border-muted pt-4">
                   {posts.map((p, idx) => (

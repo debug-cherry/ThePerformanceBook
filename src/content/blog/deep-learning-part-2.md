@@ -3,7 +3,7 @@ title: "Deep Learning Part 2: Backpropagation and Optimization"
 date: "2026-07-02"
 description: "Understanding backpropagation, gradient calculation via the chain rule, and weight updates."
 draft: false
-series: "Deep Learning"
+series: deep-learning
 series_order: 2
 width: wide
 ---

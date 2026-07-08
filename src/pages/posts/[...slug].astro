@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
@@ -27,14 +27,16 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-US', {
 
 // Series Logic
 const isSeries = !!post.data.series;
+let seriesEntry = null;
 let seriesPosts: CollectionEntry<'blog'>[] = [];
 let currentIndex = -1;
 let prevPost = null;
 let nextPost = null;
 
-if (isSeries) {
+if (isSeries && post.data.series) {
+  seriesEntry = await getEntry(post.data.series);
   seriesPosts = allPosts
-    .filter((p) => p.data.series === post.data.series)
+    .filter((p) => p.data.series?.id === post.data.series.id)
     .sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
 
   currentIndex = seriesPosts.findIndex((p) => p.id === post.id);
@@ -50,6 +52,7 @@ const widthMapping = {
   narrow: '65ch',
   standard: '80ch',
   wide: '98ch',
+  full: '128ch',
 };
 const selectedWidth = widthMapping[post.data.width || 'standard'];
 ---
@@ -177,7 +180,7 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
           <div class="bg-bg-surface/10 border border-border-muted rounded-2xl p-6 mb-10 shadow-lg">
             <h3 class="text-sm font-bold text-text-base tracking-wider uppercase mb-3.5 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-bg-surface"></span>
-              Series: {post.data.series}
+              Series: <a href={`${baseUrl}/series/${post.data.series.id}/`} class="hover:underline text-text-base">{seriesEntry?.data.title || post.data.series.id}</a>
             </h3>
             <p class="text-xs text-text-muted mb-4">
               This article is part of a {seriesPosts.length}-part series. Follow along below:

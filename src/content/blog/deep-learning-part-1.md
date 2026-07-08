@@ -3,7 +3,7 @@ title: "Deep Learning Part 1: Foundations of Neural Networks"
 date: "2026-07-01"
 description: "An introduction to neural networks, activation functions, and their mathematical representations."
 draft: false
-series: "Deep Learning"
+series: deep-learning
 series_order: 1
 width: wide
 ---
