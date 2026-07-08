@@ -27,7 +27,7 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('en-US', {
 
 // Series Logic
 const isSeries = !!post.data.series;
-let seriesEntry = null;
+let seriesEntry: CollectionEntry<'series'> | null = null;
 let seriesPosts: CollectionEntry<'blog'>[] = [];
 let currentIndex = -1;
 let prevPost = null;
@@ -176,42 +176,22 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
           </p>
         </header>
 
-        <!-- Series Panel -->
-        {isSeries && (
-          <div class="bg-bg-surface/10 border border-border-muted rounded-2xl p-6 mb-10 shadow-lg">
-            <h3 class="text-sm font-bold text-text-base tracking-wider uppercase mb-3.5 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-bg-surface"></span>
-              Series: <a href={`${baseUrl}/series/${post.data.series?.id}/`} class="hover:underline text-text-base">{seriesEntry?.data.title || post.data.series?.id}</a>
-            </h3>
-            <p class="text-xs text-text-muted mb-4">
-              This article is part of a {seriesPosts.length}-part series. Follow along below:
-            </p>
-            <ol class="space-y-2.5">
-              {seriesPosts.map((p, idx) => (
-                <li class="flex items-center gap-2 text-sm">
-                  <span class={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
-                    p.id === post.id
-                      ? 'bg-bg-surface text-text-base shadow-md shadow-bg-surface/20'
-                      : 'bg-bg-surface/10 text-text-muted border border-border-muted'
-                  }`}>
-                    {idx + 1}
-                  </span>
-                  {p.id === post.id ? (
-                    <span class="font-semibold text-text-base">
-                      {p.data.title} <span class="text-xs font-normal text-text-muted ml-1.5">(You are here)</span>
-                    </span>
-                  ) : (
-                    <a
-                      href={`${baseUrl}/posts/${p.id}/`}
-                      class="text-text-muted hover:text-text-base transition-colors font-medium hover:underline decoration-border-muted underline-offset-4"
-                    >
-                      {p.data.title}
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </div>
+        <!-- Dynamic Compact Series Badge (Replaces old multi-part box) -->
+        {seriesEntry && (
+          <a href={`${baseUrl}/series/${seriesEntry.id}/`} class="series-badge-card">
+            <div class="badge-icon-wrapper">
+              <!-- Inline Stack / Layers Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+            </div>
+            <div class="badge-text-wrapper">
+              <span class="badge-label">Part of series</span>
+              <span class="badge-title">{seriesEntry.data.title}</span>
+            </div>
+          </a>
         )}
 
         <!-- Dynamic Markdown Content -->
@@ -367,6 +347,55 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
     .sidebar-heading {
       display: none;
     }
+  }
+
+  /* Compact Series Badge Styling */
+  .series-badge-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border-muted);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    margin-bottom: 2.5rem;
+    width: 100%;
+  }
+
+  .series-badge-card:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-bg-surface);
+    opacity: 0.9;
+  }
+
+  .badge-icon-wrapper {
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .badge-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .badge-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-title {
+    font-size: 1rem;
+    color: var(--color-text-base);
+    font-weight: 700;
+    line-height: 1.3;
   }
 </style>
 

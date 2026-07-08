@@ -5,7 +5,7 @@ description: "An introduction to building a custom, high-performance vector data
 draft: false
 series: building-vector-db
 series_order: 1
-width: "narrow"
+width: "full"
 ---
 The rapid adoption of machine learning has introduced a shift in how databases manage and query data. Traditional databases (relational or document-based) excel at exact matching—finding a row where `user_id = 42` or checking if a text field contains a specific keyword. However, modern machine learning applications deal with an ever-increasing amount of unstructured data: images, natural language, audio, etc. In these domains, exact matching fails and instead we must depend on similarity, or what is called **Semantic Similarity**.
 
