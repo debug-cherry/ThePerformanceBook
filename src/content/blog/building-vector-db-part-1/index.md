@@ -20,19 +20,13 @@ The rapid adoption of machine learning has introduced a shift in how databases m
 
 For this, unstructured data is passed through deep learning models to generate vector embedding—numerical representations in a high-dimensional space where closeness in space corresponds to similarity in meaning.
 
-> *A vector database is a storage and retrieval engine designed specifically to store these embedding and perform fast nearest-neighbor searches over millions of vectors in high-dimensional spaces*.
-
-In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
-
 <div class="fact-box">
 
-#### 💡 Fast Fourier Transform Complexity
-The discrete Fourier transform can be computed in $\mathcal{O}(N \log N)$ operations using the FFT algorithm, compared to the native $\mathcal{O}(N^2)$ matrix-vector multiplication.
-
-*   **Inventors:** Cooley and Tukey (1965)
-*   **Core optimization:** Divide-and-conquer recursion
+A **vector database** is a storage and retrieval engine designed specifically to store these embedding and perform fast nearest-neighbor searches over millions of vectors in high-dimensional spaces.
 
 </div>
+
+In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
 
 ## The Basics of Vector Database
 
