@@ -11,7 +11,17 @@ const series = defineCollection({
 });
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/blog',
+    generateId: ({ entry }) => {
+      const cleanPath = entry.replace(/\.md$/, '');
+      if (cleanPath.endsWith('/index')) {
+        return cleanPath.slice(0, -6);
+      }
+      return cleanPath;
+    }
+  }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),

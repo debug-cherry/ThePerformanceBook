@@ -24,6 +24,11 @@ For this, unstructured data is passed through deep learning models to generate v
 
 In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
 
+Below is the high-level architecture diagram of the database indexing flow:
+
+![Vector DB Indexing Flow](./architecture.png)
+*Figure 1: High-level overview of our vector database indexing and retrieval pipeline.*
+
 
 ## The Basics of Vector Database
 

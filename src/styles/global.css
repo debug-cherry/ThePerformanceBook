@@ -23,3 +23,41 @@
   --color-text-muted: var(--text-muted);
   --color-text-base: var(--text-base);
 }
+
+/* ==========================================
+   MARKDOWN IMAGE & CAPTION STYLING
+   ========================================== */
+
+/* Selects images inside the compiled article body */
+article img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2.5rem auto 1rem auto; /* Generous top spacing, tight bottom spacing */
+  border-radius: 8px;
+  border: 1px solid var(--color-border-muted); /* Soft border matching current theme */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Subtle depth shadow */
+  transition: border-color 0.15s ease;
+}
+
+/* Target figure/image captions when written as italicised text directly below the image */
+article img + em,
+article img + p > em {
+  display: block;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  margin-bottom: 2.5rem; /* Large spacing before next paragraph */
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Style adjustment for links inside captions (if any) */
+article img + em a,
+article img + p > em a {
+  color: var(--color-text-base);
+  text-decoration: underline;
+}
