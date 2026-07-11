@@ -61,3 +61,64 @@ article img + p > em a {
   color: var(--color-text-base);
   text-decoration: underline;
 }
+
+/* ==========================================
+   PROSE CALLOUT / FACT BOX STYLING
+   ========================================== */
+
+.fact-box {
+  margin: 2.5rem 0;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--color-bg-surface); /* Uses surface cards color */
+  border-radius: 6px;
+  
+  /* Subtle outer container borders */
+  border-top: 1px solid var(--color-border-muted);
+  border-right: 1px solid var(--color-border-muted);
+  border-bottom: 1px solid var(--color-border-muted);
+  
+  /* Prominent left accent line (Thickness: 4px) */
+  border-left: 4px solid var(--color-border-muted); 
+  
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-base);
+}
+
+/* Headings inside the fact box */
+.fact-box h1,
+.fact-box h2,
+.fact-box h3,
+.fact-box h4 {
+  margin-top: 0 !important;
+  margin-bottom: 0.5rem !important;
+  color: var(--color-text-base) !important;
+  font-weight: 700 !important;
+}
+
+/* Paragraph margins constraint inside fact box */
+.fact-box p {
+  margin: 0 !important;
+}
+
+/* Spacer rules for consecutive paragraphs inside the callout */
+.fact-box p + p,
+.fact-box p + ul,
+.fact-box p + ol {
+  margin-top: 0.75rem !important;
+}
+
+/* Lists adjustments inside fact box */
+.fact-box ul,
+.fact-box ol {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0 !important;
+  padding-left: 1.25rem !important;
+}
+
+.fact-box li {
+  margin-bottom: 0.25rem !important;
+}
+.fact-box li:last-child {
+  margin-bottom: 0 !important;
+}

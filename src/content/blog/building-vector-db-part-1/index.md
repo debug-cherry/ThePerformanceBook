@@ -24,6 +24,16 @@ For this, unstructured data is passed through deep learning models to generate v
 
 In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
 
+<div class="fact-box">
+
+#### 💡 Fast Fourier Transform Complexity
+The discrete Fourier transform can be computed in $\mathcal{O}(N \log N)$ operations using the FFT algorithm, compared to the native $\mathcal{O}(N^2)$ matrix-vector multiplication.
+
+*   **Inventors:** Cooley and Tukey (1965)
+*   **Core optimization:** Divide-and-conquer recursion
+
+</div>
+
 ## The Basics of Vector Database
 
 Let’s start with the basics of a *naive* vector database engine. At the bare minimum, such an engine must support the following operations:
