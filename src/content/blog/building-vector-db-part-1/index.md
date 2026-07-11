@@ -24,12 +24,6 @@ For this, unstructured data is passed through deep learning models to generate v
 
 In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
 
-Below is the high-level architecture diagram of the database indexing flow:
-
-![Vector DB Indexing Flow](./architecture.png)
-*Figure 1: High-level overview of our vector database indexing and retrieval pipeline.*
-
-
 ## The Basics of Vector Database
 
 Let’s start with the basics of a *naive* vector database engine. At the bare minimum, such an engine must support the following operations:
@@ -474,7 +468,8 @@ This launches an interactive interface displaying the functions responsible for 
 
 Following is a screenshot from the `perf` report.
 
-![A snippet from the perf report](https://cdn.hashnode.com/uploads/covers/6a48e22463fb28726f9e72a0/951832b2-bb34-4f7d-b982-52980e73797c.png align="center")
+![A snippet from the perf report](./PerfReport.png)
+*Image from the `perf` report*
 
 For our analysis, we are primarily interested in two columns:
 
