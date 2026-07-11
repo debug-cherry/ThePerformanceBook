@@ -6,8 +6,8 @@ draft: false
 series: building-vector-db
 series_order: 1
 width: "full"
-githubRepo: "debug-cherry/vector-db-engine"
-githubCommits: "main"
+githubRepo: "debug-cherry/tvDataBus"
+githubReleases: "v0.1-baseline"
 suggestedResources:
   - title: "Pinecone's Vector Database Overview"
     url: "https://www.pinecone.io/learn/vector-database/"
@@ -24,7 +24,6 @@ For this, unstructured data is passed through deep learning models to generate v
 
 In this series, I will be learning and building a custom, high-performance vector database engine in C++ integrated with SQLite. Each part will deal with a specific feature or optimization and full length discussion on that (I really hope I can learn about it properly to hold a good discussion).
 
-GitHub Repository: [github.com/debug-cherry/tvDataBus](https://github.com/debug-cherry/tvDataBus)
 
 ## The Basics of Vector Database
 
