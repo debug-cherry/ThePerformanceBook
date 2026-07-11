@@ -426,13 +426,14 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
     border: 1px solid var(--color-border-muted);
     border-radius: 8px;
     text-decoration: none;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    /* Smooth transition focused on borders */
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
   }
 
+  /* Refined, Minimal Hover State: Transition borders only */
   .utility-card:hover {
     border-color: var(--color-text-muted);
-    background-color: rgba(27, 38, 59, 0.8);
   }
 
   .card-icon {
