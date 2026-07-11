@@ -6,6 +6,14 @@ draft: false
 series: building-vector-db
 series_order: 1
 width: "full"
+githubRepo: "debug-cherry/vector-db-engine"
+suggestedResources:
+  - title: "Pinecone's Vector Database Overview"
+    url: "https://www.pinecone.io/learn/vector-database/"
+    description: "An excellent conceptual introduction to the architecture of vector databases."
+  - title: "Milvus Documentation"
+    url: "https://milvus.io/docs"
+    description: "Detailed system architecture details of a production-grade distributed vector database."
 ---
 The rapid adoption of machine learning has introduced a shift in how databases manage and query data. Traditional databases (relational or document-based) excel at exact matching—finding a row where `user_id = 42` or checking if a text field contains a specific keyword. However, modern machine learning applications deal with an ever-increasing amount of unstructured data: images, natural language, audio, etc. In these domains, exact matching fails and instead we must depend on similarity, or what is called **Semantic Similarity**.
 

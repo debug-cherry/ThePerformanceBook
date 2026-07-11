@@ -176,23 +176,81 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
           </p>
         </header>
 
-        <!-- Dynamic Compact Series Badge (Replaces old multi-part box) -->
-        {seriesEntry && (
-          <a href={`${baseUrl}/series/${seriesEntry.id}/`} class="series-badge-card">
-            <div class="badge-icon-wrapper">
-              <!-- Inline Stack / Layers Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                <polyline points="2 17 12 22 22 17"></polyline>
-                <polyline points="2 12 12 17 22 12"></polyline>
-              </svg>
-            </div>
-            <div class="badge-text-wrapper">
-              <span class="badge-label">Part of series</span>
-              <span class="badge-title">{seriesEntry.data.title}</span>
-            </div>
-          </a>
-        )}
+        <!-- Utility Cards Group (Series, Github, Suggested Resources) -->
+        <div class="post-utility-cards">
+          <!-- 1. Part of Series Card (Existing) -->
+          {seriesEntry && (
+            <a href={`${baseUrl}/series/${seriesEntry.id}/`} class="utility-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <div class="card-text">
+                <span class="card-label">Part of series</span>
+                <span class="card-title">{seriesEntry.data.title}</span>
+              </div>
+            </a>
+          )}
+
+          <!-- 2. Related GitHub Repository Card (Optional) -->
+          {post.data.githubRepo && (
+            <a href={`https://github.com/${post.data.githubRepo}`} target="_blank" rel="noopener noreferrer" class="utility-card">
+              <div class="card-icon">
+                <!-- GitHub SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+                  <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                </svg>
+              </div>
+              <div class="card-text">
+                <span class="card-label">Related repository</span>
+                <span class="card-title">{post.data.githubRepo}</span>
+              </div>
+            </a>
+          )}
+
+          <!-- 3. Suggested Resources Card (Optional & Collapsible) -->
+          {post.data.suggestedResources && post.data.suggestedResources.length > 0 && (
+            <details class="utility-card collapsible-card">
+              <summary class="collapsible-summary">
+                <div class="card-icon">
+                  <!-- Book Open SVG Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                  </svg>
+                </div>
+                <div class="card-text">
+                  <span class="card-label">Suggested resources</span>
+                  <span class="card-title">Explore papers, documentation, and reference links</span>
+                </div>
+                <div class="caret-wrapper">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="caret-svg">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </summary>
+              <div class="collapsible-content">
+                <ul class="resources-list">
+                  {post.data.suggestedResources.map((resource) => (
+                    <li>
+                      <a href={resource.url} target="_blank" rel="noopener noreferrer" class="resource-item-link">
+                        <div class="resource-title-row">
+                          <span class="resource-title">{resource.title}</span>
+                          <span class="resource-domain-badge">{new URL(resource.url).hostname} →</span>
+                        </div>
+                        {resource.description && <p class="resource-description">{resource.description}</p>}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          )}
+        </div>
 
         <!-- Dynamic Markdown Content -->
         <div class="mt-8">
@@ -349,9 +407,18 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
     }
   }
 
-  /* Compact Series Badge Styling */
-  .series-badge-card {
-    display: inline-flex;
+  /* Utility Cards Group */
+  .post-utility-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    width: 100%;
+  }
+
+  /* Universal Card styling */
+  .utility-card {
+    display: flex;
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1.25rem;
@@ -360,42 +427,134 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
     border-radius: 8px;
     text-decoration: none;
     transition: border-color 0.15s ease, background-color 0.15s ease;
-    margin-bottom: 0rem;
     width: 100%;
   }
 
-  .series-badge-card:hover {
+  .utility-card:hover {
     border-color: var(--color-text-muted);
-    background-color: var(--color-bg-surface);
-    opacity: 0.9;
+    background-color: rgba(27, 38, 59, 0.8);
   }
 
-  .badge-icon-wrapper {
+  .card-icon {
     color: var(--color-text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
-  .badge-text-wrapper {
+  .card-text {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
+    flex-grow: 1;
+    text-align: left;
   }
 
-  .badge-label {
-    font-size: 0.75rem;
+  .card-label {
+    font-size: 0.725rem;
     color: var(--color-text-muted);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .badge-title {
+  .card-title {
     font-size: 1rem;
     color: var(--color-text-base);
     font-weight: 700;
     line-height: 1.3;
+  }
+
+  /* Collapsible Native CSS configurations */
+  .collapsible-card {
+    display: block; /* Overrides default flex rules */
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .collapsible-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    list-style: none; /* Removes default details arrow toggle indicator */
+  }
+
+  .collapsible-summary::-webkit-details-marker {
+    display: none; /* Secondary Webkit target for default arrow dismissal */
+  }
+
+  .caret-wrapper {
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .caret-svg {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  /* Rotate caret SVG on native tag open state change */
+  details[open] .caret-svg {
+    transform: rotate(180deg);
+  }
+
+  /* Expanded Inner Drawer Area */
+  .collapsible-content {
+    border-top: 1px solid var(--color-border-muted);
+    padding: 1rem 1.25rem 1.25rem 1.25rem;
+    cursor: default;
+  }
+
+  .resources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .resource-item-link {
+    display: block;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+  }
+
+  .resource-item-link:hover {
+    background-color: var(--color-bg-base);
+  }
+
+  .resource-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .resource-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-base);
+  }
+
+  .resource-domain-badge {
+    font-size: 0.775rem;
+    color: var(--color-text-muted);
+    opacity: 0.8;
+  }
+
+  .resource-description {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+    text-align: left;
   }
 </style>
 

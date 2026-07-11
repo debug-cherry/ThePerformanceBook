@@ -3,6 +3,11 @@ title: "Welcome to The Performance Book: Building High Performance Software"
 date: "2026-07-03"
 description: "An overview of systems programming, performance optimizations, and algorithmic design."
 draft: false
+githubRepo: "debug-cherry/performance-book"
+suggestedResources:
+  - title: "Systems Performance: Enterprise and the Cloud"
+    url: "http://www.brendangregg.com/systems-performance-2nd-edition.html"
+    description: "Brendan Gregg's definitive guide to systems performance evaluation and tools."
 ---
 
 Welcome to **The Performance Book**. This blog is dedicated to developers interested in squeezing every drop of efficiency out of their code, understanding low-level hardware interactions, and building highly scalable architectures.

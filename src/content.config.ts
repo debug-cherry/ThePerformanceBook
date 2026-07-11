@@ -22,6 +22,14 @@ const blog = defineCollection({
     coverImage: z.string().optional(),
     coverAlt: z.string().optional(),
     width: z.enum(['narrow', 'standard', 'wide', 'full']).default('standard'),
+    githubRepo: z.string().optional(),
+    suggestedResources: z.array(
+      z.object({
+        title: z.string(),
+        url: z.string(),
+        description: z.string().optional(),
+      })
+    ).optional(),
   }),
 });
 
