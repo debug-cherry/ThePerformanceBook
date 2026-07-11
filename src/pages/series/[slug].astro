@@ -123,12 +123,11 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     border: 1px solid var(--color-border-muted);
     border-radius: 8px;
     width: 100%;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
+    transition: border-color 0.3s ease;
   }
 
   .post-card:hover {
-    border-color: rgba(65, 90, 119, 0.4);
-    background-color: rgba(27, 38, 59, 0.2);
+    border-color: var(--color-text-muted);
   }
 
   /* Text Wrapper: Fills all empty space */
@@ -224,6 +223,11 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     border: 1px solid var(--color-border-muted);
     font-family: monospace;
     line-height: 1.6;
+    transition: border-color 0.3s ease;
+  }
+
+  .card-preview:hover {
+    border-color: var(--color-text-muted);
   }
   
   .card-body-content h2 {

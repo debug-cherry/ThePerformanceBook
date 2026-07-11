@@ -23,6 +23,8 @@ const blog = defineCollection({
     coverAlt: z.string().optional(),
     width: z.enum(['narrow', 'standard', 'wide', 'full']).default('standard'),
     githubRepo: z.string().optional(),
+    githubCommits: z.string().optional(),
+    githubReleases: z.string().optional(),
     suggestedResources: z.array(
       z.object({
         title: z.string(),

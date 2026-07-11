@@ -4,6 +4,7 @@ date: "2026-07-03"
 description: "An overview of systems programming, performance optimizations, and algorithmic design."
 draft: false
 githubRepo: "debug-cherry/performance-book"
+githubReleases: "v1.0.0"
 suggestedResources:
   - title: "Systems Performance: Enterprise and the Cloud"
     url: "http://www.brendangregg.com/systems-performance-2nd-edition.html"

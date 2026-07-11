@@ -7,6 +7,7 @@ series: building-vector-db
 series_order: 1
 width: "full"
 githubRepo: "debug-cherry/vector-db-engine"
+githubCommits: "main"
 suggestedResources:
   - title: "Pinecone's Vector Database Overview"
     url: "https://www.pinecone.io/learn/vector-database/"
