@@ -243,29 +243,3 @@ The profiling data indicates that the `VectorEngine::calculate_l2_distance` func
 Our baseline implementation successfully integrates an in-memory vector storage engine with SQLite. However, our profiling data clearly identifies the core bottleneck: nearly four-fifths of our execution time is consumed by the scalar $L_2$ distance calculation loop.
 
 In the next part of this series, we will address this bottleneck directly by exploring vectorization, utilizing SIMD (Single Instruction, Multiple Data) instructions to parallelize the distance calculations across multiple floating-point values simultaneously.
-
----
-
-## References & Further Reading
-
-For additional details on vector databases and SIMD instructions, explore the following resources.
-
-### Custom Inline Cards
-
-You can view the development history on <span class="inline-card preset-github"><a href="https://github.com">GitHub</a></span> or find similar solutions on <span class="inline-card preset-stackoverflow"><a href="https://stackoverflow.com">StackOverflow</a></span>.
-
-### Custom Block Cards
-
-<div class="block-card preset-wikipedia">
-  <a href="https://wikipedia.org">
-    <span class="card-label">Wikipedia Reference</span>
-    <span class="card-title">Vector Database Concepts</span>
-  </a>
-</div>
-
-<div class="block-card preset-github">
-  <a href="https://github.com">
-    <span class="card-label">GitHub Repository</span>
-    <span class="card-title">Vector Database Source Code</span>
-  </a>
-</div>
