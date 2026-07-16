@@ -2,59 +2,56 @@
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// Fetch all posts, filtering out drafts in production
+// 1. Fetch collections, filtering out drafts in production
 const allPosts = await getCollection('blog', ({ data }) => {
   return import.meta.env.PROD ? !data.draft : true;
 });
 
-// Fetch all series profile entries
 const allSeries = await getCollection('series');
 const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
 
-// Sort all posts globally by date descending (Absolute newest first)
+// 2. Sort posts globally by date descending (Absolute newest first)
 const sortedPosts = [...allPosts].sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// Isolate the absolute latest post
+// 3. Isolate the absolute latest post and its series context
 const latestPost = sortedPosts[0];
+const latestPostSeries = latestPost?.data.series ? await getEntry(latestPost.data.series) : null;
 
-// Resolve the series relationship context if the latest post is part of one
-let latestPostSeries = null;
-if (latestPost && latestPost.data.series) {
-  latestPostSeries = await getEntry(latestPost.data.series);
-}
-
-// Filter standalone posts (no series associated)
+// 4. Filter standalone posts (no series associated)
 const standalonePosts = sortedPosts.filter((p) => !p.data.series);
 
-// Group series posts by series ID
+// 5. Group series posts by series ID
 const seriesGroups: Record<string, typeof allPosts> = {};
 allPosts.forEach((post) => {
   if (post.data.series) {
     const seriesId = post.data.series.id;
-    if (!seriesGroups[seriesId]) {
-      seriesGroups[seriesId] = [];
-    }
-    seriesGroups[seriesId].push(post);
+    (seriesGroups[seriesId] ??= []).push(post);
   }
 });
 
 // Sort each series chronologically by series_order
-Object.keys(seriesGroups).forEach((seriesId) => {
-  seriesGroups[seriesId].sort((a, b) => (a.data.series_order || 0) - (b.data.series_order || 0));
-});
+for (const seriesId in seriesGroups) {
+  seriesGroups[seriesId].sort((a, b) => (a.data.series_order ?? 0) - (b.data.series_order ?? 0));
+}
 
-// Get the base path
+// 6. Base URL & Helper utilities
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
 ---
 
 <BaseLayout title="Home">
   <div class="home-container">
+    
     <!-- Latest Article Section -->
     <section class="latest-section">
       <h3 class="section-title">Latest Article</h3>
       
       {latestPost && (
-        <article class="latest-post-card group">
+        <article class="content-card latest-post-card group">
           <!-- Left Column: Flex-Grow container -->
           <div class="card-body-content">
             <div class="card-meta">
@@ -69,7 +66,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
               )}
               
               <time datetime={latestPost.data.date.toISOString()}>
-                {latestPost.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {formatDate(latestPost.data.date)}
               </time>
             </div>
             
@@ -102,28 +99,26 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
           <div class="grid gap-6">
             {Object.entries(seriesGroups).map(([seriesId, posts]) => {
               const series = seriesMap.get(seriesId);
-              const firstPostDate = new Date(posts[0].data.date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              });
               return (
-                <div class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/50 hover:bg-bg-surface/20 transition-all duration-300">
+                <div class="content-card group">
                   <div class="flex items-center justify-between mb-3">
                     <span class="text-xs font-bold text-text-muted tracking-wider uppercase flex items-center gap-1.5">
                       <span class="w-1.5 h-1.5 rounded-full bg-bg-surface"></span>
                       {posts.length} Parts
                     </span>
-                    <span class="text-xs text-text-muted font-medium">Started {firstPostDate}</span>
+                    <span class="text-xs text-text-muted font-medium">Started {formatDate(posts[0].data.date)}</span>
                   </div>
+                  
                   <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
                     <a href={`${baseUrl}/series/${seriesId}/`} class="hover:underline">
                       {series?.data.title || seriesId}
                     </a>
                   </h3>
+                  
                   <p class="text-sm text-text-muted mb-5 leading-relaxed">
                     {series?.data.description || "Explore theoretical models, mathematical formulas, and sample code step-by-step."}
                   </p>
+                  
                   <ol class="space-y-2.5 border-t border-border-muted pt-4">
                     {posts.map((p, idx) => (
                       <li class="flex items-start gap-2.5 text-sm">
@@ -147,56 +142,56 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
       )}
 
       <!-- Standalone Posts -->
-      <section>
-        <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
-          <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
-          Latest Articles
-        </h2>
-        <div class="space-y-6">
-          {standalonePosts.map((post) => {
-            const postDate = new Date(post.data.date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            });
-            return (
-              <article class="group relative overflow-hidden rounded-xl border border-border-muted bg-bg-surface/10 p-6 shadow-md hover:border-bg-surface/30 hover:bg-bg-surface/20 transition-all duration-300 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div class="flex-grow">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
-                      Standalone
-                    </span>
-                    <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
-                      {postDate}
-                    </time>
+      {standalonePosts.length > 0 && (
+        <section>
+          <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
+            <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
+            Latest Articles
+          </h2>
+          <div class="space-y-6">
+            {standalonePosts.map((post) => {
+              return (
+                <article class="content-card group flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div class="flex-grow">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
+                        Standalone
+                      </span>
+                      <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
+                        {formatDate(post.data.date)}
+                      </time>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
+                      <a href={`${baseUrl}/posts/${post.id}/`}>
+                        {post.data.title}
+                      </a>
+                    </h3>
+                    
+                    <p class="text-sm text-text-muted leading-relaxed max-w-xl">
+                      {post.data.description}
+                    </p>
                   </div>
-                  <h3 class="text-lg font-bold text-text-base mb-2 group-hover:text-text-muted transition-colors">
-                    <a href={`${baseUrl}/posts/${post.id}/`}>
-                      {post.data.title}
+                  
+                  <div class="flex items-center self-end sm:self-center">
+                    <a
+                      href={`${baseUrl}/posts/${post.id}/`}
+                      class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
+                      aria-label={`Read ${post.data.title}`}
+                    >
+                      Read Article
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                      </svg>
                     </a>
-                  </h3>
-                  <p class="text-sm text-text-muted leading-relaxed max-w-xl">
-                    {post.data.description}
-                  </p>
-                </div>
-                <div class="flex items-center self-end sm:self-center">
-                  <a
-                    href={`${baseUrl}/posts/${post.id}/`}
-                    class="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-text-base group-hover:translate-x-1.5 transition-all duration-200"
-                    aria-label={`Read ${post.data.title}`}
-                  >
-                    Read Article
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M5 12h14"></path>
-                      <path d="m12 5 7 7-7 7"></path>
-                    </svg>
-                  </a>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   </div>
 </BaseLayout>
@@ -224,23 +219,30 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     border-left: 3px solid var(--color-border-muted);
   }
 
-  /* Card Layout CSS (Width-Optimized) */
+  /* Shared Card Styling base structure */
+  .content-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--color-border-muted);
+    background-color: rgba(27, 38, 59, 0.1); /* bg-bg-surface/10 equivalent */
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* shadow-md */
+    transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .content-card:hover {
+    border-color: rgba(65, 90, 119, 0.4);
+    background-color: rgba(27, 38, 59, 0.2);
+  }
+
+  /* Latest Post Card Width Adjustments */
   .latest-post-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 3rem;
-    padding: 2rem;
-    background-color: var(--color-bg-surface);
-    border: 1px solid var(--color-border-muted);
-    border-radius: 8px;
     width: 100%;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-  }
-
-  .latest-post-card:hover {
-    border-color: rgba(65, 90, 119, 0.4);
-    background-color: rgba(27, 38, 59, 0.2);
   }
 
   .card-body-content {
@@ -269,28 +271,27 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   }
 
   /* Badges Styling */
-  .standalone-badge {
+  .standalone-badge,
+  .series-badge {
     border: 1px solid var(--color-border-muted);
-    color: var(--color-text-muted);
     padding: 0.15rem 0.5rem;
     font-size: 0.7rem;
-    font-weight: 600;
     border-radius: 4px;
-    border: 1px solid var(--color-border-muted);
+  }
+
+  .standalone-badge {
+    color: var(--color-text-muted);
+    font-weight: 600;
   }
 
   .series-badge {
     background-color: var(--color-bg-base);
     color: var(--color-text-base);
-    padding: 0.15rem 0.5rem;
-    font-size: 0.7rem;
     font-weight: 700;
-    border-radius: 4px;
     max-width: 320px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border: 1px solid var(--color-border-muted);
   }
 
   .card-link {
@@ -336,12 +337,12 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
     transition: transform 0.15s ease;
   }
 
+  /* Mobile responsiveness optimization */
   @media (max-width: 640px) {
     .latest-post-card {
       flex-direction: column;
       align-items: flex-start;
       gap: 1.5rem;
-      padding: 1.5rem;
     }
     .card-action-wrapper {
       align-self: flex-end;
