@@ -146,7 +146,7 @@ const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
         <section>
           <h2 class="text-xl font-bold text-text-base tracking-tight mb-6 flex items-center gap-2.5">
             <span class="w-3.5 h-1.5 rounded-full bg-bg-surface"></span>
-            Latest Articles
+            Standalone Articles
           </h2>
           <div class="space-y-6">
             {standalonePosts.map((post) => {
@@ -154,9 +154,6 @@ const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
                 <article class="content-card group flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div class="flex-grow">
                     <div class="flex items-center gap-2 mb-2">
-                      <span class="text-[10px] font-bold text-text-muted bg-bg-surface/20 px-2 py-0.5 rounded border border-border-muted">
-                        Standalone
-                      </span>
                       <time datetime={post.data.date.toISOString()} class="text-xs text-text-muted font-medium">
                         {formatDate(post.data.date)}
                       </time>
