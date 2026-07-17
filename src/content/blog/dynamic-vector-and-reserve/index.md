@@ -1,10 +1,11 @@
 ---
 title: "Preventing Reallocation Bottlenecks: Dynamic Vector Growth and std::vector::reserve"
-date: "2026-07-22"
+date: "2026-07-15"
 description: "An analysis of the performance implications of geometric expansion in std::vector, and how pre-allocation minimizes memory churn."
 draft: false
 series: building-vector-db
-series_order: 3
+quickByte: true
+series_order: 2
 width: "full"
 suggestedResources:
   - title: "Cppreference: std::vector::reserve"
