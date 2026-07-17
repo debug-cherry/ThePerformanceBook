@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSeriesPartLabel } from '../utils/series';
 
 // 1. Fetch collections, filtering out drafts in production
 const allPosts = await getCollection('blog', ({ data }) => {
@@ -59,10 +60,12 @@ const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
               <!-- Dynamic Badge Type Configuration -->
               {latestPostSeries ? (
                 <span class="series-badge">
-                  Part {latestPost.data.series_order || 1} • {latestPostSeries.data.title}
+                  {getSeriesPartLabel(latestPost, seriesGroups[latestPost.data.series!.id])} • {latestPostSeries.data.title}
                 </span>
               ) : (
-                <span class="standalone-badge">Standalone</span>
+                <span class="standalone-badge">
+                  {latestPost.data.quickByte ? "Quick Byte" : "Standalone"}
+                </span>
               )}
               
               <time datetime={latestPost.data.date.toISOString()}>
@@ -120,19 +123,29 @@ const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
                   </p>
                   
                   <ol class="space-y-2.5 border-t border-border-muted pt-4">
-                    {posts.map((p, idx) => (
-                      <li class="flex items-start gap-2.5 text-sm">
-                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-bg-surface/20 text-text-base text-[10px] font-bold border border-border-muted mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <a
-                          href={`${baseUrl}/posts/${p.id}/`}
-                          class="text-text-base hover:text-text-muted font-medium transition-colors hover:underline underline-offset-4 decoration-bg-surface/20"
-                        >
-                          {p.data.title}
-                        </a>
-                      </li>
-                    ))}
+                    {(() => {
+                      let partIdx = 1;
+                      return posts.map((p) => {
+                        const isQB = p.data.quickByte;
+                        const displayLabel = isQB ? "QB" : partIdx++;
+                        return (
+                          <li class="flex items-start gap-2.5 text-sm">
+                            <span class:list={[
+                              "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold border border-border-muted mt-0.5",
+                              isQB ? "bg-bg-base/40 text-text-muted" : "bg-bg-surface/20 text-text-base"
+                            ]}>
+                              {displayLabel}
+                            </span>
+                            <a
+                              href={`${baseUrl}/posts/${p.id}/`}
+                              class="text-text-base hover:text-text-muted font-medium transition-colors hover:underline underline-offset-4 decoration-bg-surface/20"
+                            >
+                              {p.data.title}
+                            </a>
+                          </li>
+                        );
+                      });
+                    })()}
                   </ol>
                 </div>
               );

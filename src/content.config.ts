@@ -29,6 +29,7 @@ const blog = defineCollection({
     draft: z.boolean().default(false),
     series: reference('series').optional(),
     series_order: z.number().optional(),
+    quickByte: z.boolean().default(false),
     coverImage: z.string().optional(),
     coverAlt: z.string().optional(),
     width: z.enum(['narrow', 'standard', 'wide', 'full']).default('standard'),

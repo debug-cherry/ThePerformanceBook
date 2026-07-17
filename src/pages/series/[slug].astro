@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSeriesPartLabel } from '../../utils/series';
 
 export async function getStaticPaths() {
   const seriesEntries = await getCollection('series');
@@ -75,9 +76,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
           <!-- Left Column: Flex-Grow container to fill card width -->
           <div class="card-body-content">
             <div class="card-meta">
-              {post.data.series_order && (
-                <span class="part-badge">Part {post.data.series_order}</span>
-              )}
+              <span class="part-badge">{getSeriesPartLabel(post, posts)}</span>
               <time datetime={post.data.date.toISOString()}>
                 {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </time>

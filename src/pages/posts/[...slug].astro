@@ -3,6 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
+import { getSeriesPartLabel } from '../../utils/series';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
@@ -189,7 +190,7 @@ const selectedWidth = widthMapping[post.data.width || 'standard'];
                 </svg>
               </div>
               <div class="card-text">
-                <span class="card-label">Part of series</span>
+                <span class="card-label">{getSeriesPartLabel(post, seriesPosts)}</span>
                 <span class="card-title">{seriesEntry.data.title}</span>
               </div>
             </a>
