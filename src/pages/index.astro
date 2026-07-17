@@ -127,7 +127,7 @@ const formatDate = (date: Date) => date.toLocaleDateString('en-US', {
                       let partIdx = 1;
                       return posts.map((p) => {
                         const isQB = p.data.quickByte;
-                        const displayLabel = isQB ? "QB" : partIdx++;
+                        const displayLabel = isQB ? "Q" : partIdx++;
                         return (
                           <li class="flex items-start gap-2.5 text-sm">
                             <span class:list={[
