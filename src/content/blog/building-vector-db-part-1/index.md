@@ -120,6 +120,7 @@ To minimize memory allocation overhead during a query, we reserve memory for our
 std::vector<SearchResult> results;
 results.reserve(vectors_.size());
 ```
+To understand how it is working, you can read this article: <span class="inline-card preset-uicon"><a href="https://debug-cherry.github.io/ThePerformanceBook/posts/dynamic-vector-and-reserve/">Dynamic Vector and std::vector::reserve</a></span>.
 
 ## Integrating with SQLite via the Virtual Table API
 
@@ -175,7 +176,7 @@ When SQLite processes this statement, it invokes our virtual table callbacks:
 3. The resulting `SearchResult` array is populated into `VectorCursor`.
 4. **`xNext`**, **`xEof`**, and **`xColumn`** iterate over the sorted results, returning the identifiers and distances back to SQLite's virtual machine.
 
-If you want to see the full implementation check out the Github Repo: <span class="inline-card preset-github"><a href="https://github.com/debug-cherry/tvDataBus/blob/main/src/sqlite_vector.cpp">GitHub</a></span>. For more information, see this <span class="inline-card preset-uicon"><a href="https://example.com">Reference Doc</a></span>.
+If you want to see the full implementation check out the Github Repo: <span class="inline-card preset-github"><a href="https://github.com/debug-cherry/tvDataBus/blob/main/src/sqlite_vector.cpp">GitHub</a></span>.
 
 ## Benchmarking and Profiling
 
